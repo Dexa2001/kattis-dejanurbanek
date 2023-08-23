@@ -1,0 +1,116 @@
+FINAL EXAM        01:00-03:00 PM
+
+Comprehensive
+25% on Multiple choice
+    20-30 questions
+75% on Coding
+    about 90 points on coding section
+
+keywords: 
+    -struct
+    -class          struct vs class (differences and why would u use one over other)
+        -name of the constructor    \
+                                      same ass the class
+        -name of the destructor     / 
+
+        Syntax of derived class
+
+            class A{
+            };
+
+            class B : public A{
+            };
+
+    -public
+    -private        - default acces for data and function members in class
+    -protected      - only derived class have acces to function members
+
+    -friend - allows to change where the "this" (instance variable) is passed to the function
+                -we use this to 'add" insertion operator to another class like ostream or extraction from istream
+    
+    -this - default instance variable pointer/handle
+
+    -const   - variable declaration
+                const int MAX=10;
+
+             - parameter declaration of reference
+                void fun(const int &a)  -> promise not to change a later
+
+             - between function declaration  and {  in class   -> promise not to change the instance reference
+
+                void fun()  const { 
+
+                    this->a =  <- this is not allowed
+
+    -static                     
+         class A {                        <- you can use without instance
+             public:
+             static int counter;
+         };
+
+         int A::counter=0;          <- initializing outside of class
+
+         A a;
+         A::counter     <- acces to integer
+
+
+    - virtual
+        a function that can be redifined in a subclass
+        pure virtual 
+            class A{
+                public:
+                virtual void fun()=0;   =NULL;
+            }
+
+            must be implemented in a subclass
+
+    concrete  <-all function are implemented
+
+    abstract  <-missing implementation
+
+    pure virtual  <- all function pure virtual
+
+    super class / parent class
+    
+    subclass / derived class
+    
+    :: is what ?    scope resolution operator
+
+    << >>   insertion and extraction operators
+
+    Polymorphism <-many meanings to the draw function
+    
+    IN C++ vector <A> cannot suport Polymorphism
+            vector<A*> can
+
+    ostream, istream, ofstream , ifstream , cin, ss
+        stringstream
+
+    recursion       - two conditions to be applicable
+                        1.calls itself even possibly indirectly
+                        2.stopping condition
+                            -integration
+                            -fibonachi
+
+    STACKS
+        LIFO - stack of plates
+        memory for storage and position counter
+        usefull for evaluating postfix expression
+
+    QUEUES
+        FIFO - people in line
+        two positon counter for the head and tail
+
+    LINKED LIST
+        value, and pointer to the next item in the list 
+        this can be created to make memory efficient Stakc
+
+    DOUBLY LINKED LIST
+        value, and two pointers to previous and next items
+        this can be created to make memory efficient  Queue
+
+    BINNARY TREE    
+        value, and two pinters to the lesser items and greater items
+            usually left and right
+
+        less template at least is used

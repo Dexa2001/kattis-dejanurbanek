@@ -1,0 +1,14 @@
+_________________________________________________________________________________________________________________
+|    #SWIMMER          | BY  |  15m |  25m  |  50m  |  65m  |  85m  | 100m |   AV   | SC | SC 2 |  50ef | 100ef |
+|================================================================================================================
+| ?.  Urbanek, Dejan   | 01  |  5.0 |  5.0 |  5.0 |  5.0 |  5.0 | 5.0 |  20.000 | 10 |  10  | 0.500 | 0.250 |
+|================================================================================================================
+Your swimmer is faster by 0.425 seconds or 8.500% at 15m.
+Your swimmer is faster by 5.525 seconds or 110.500% at 25m.
+Your swimmer is faster by 18.712 seconds or 374.250% at 50m.
+Your swimmer is faster by 26.137 seconds or 522.750% at 65m.
+Your swimmer is faster by 37.163 seconds or 743.250% at 85m.
+Your swimmer is faster by 45.587 seconds or 911.750% at 100m.
+Your swimmer is 18.023 m/s faster than our top 8 swimmers.
+Your swimmer has 7.500 strokes less in the first 50m
+Your swimmer has 9.750 strokes less in the last 50m

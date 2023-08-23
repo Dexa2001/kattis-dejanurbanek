@@ -1,0 +1,22 @@
+
+Keywords:
+
+    -virtual
+    -pure virtual functions
+    -virtual void fun()=0
+    -new and delete
+        A *pa;
+        pa = new A();
+        ....
+        delete pa;
+
+    -template - algorithm is what is transfered
+
+
+
+
+Vector
+
+
+
+

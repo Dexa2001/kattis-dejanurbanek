@@ -1,0 +1,127 @@
+TEST 1
+
+50% is form multiple
+
+50% from reading and writting
+    50% reading
+    50% writting
+
+whats overloading function?
+
+;; (collon collon) is what ---> the scope resolution operator and what is th euse of scope resolution
+
+Class keyword vs Struct (differences)
+
+public, private and protected  ; public and private differences
+
+scope of the variable
+    how to knopw if variable is accesable?
+
+const keyword -- understand the use of const in the parameter list vs const between 
+                    )   {   of the function implementation ( like when we have  ) const{}  )
+
+friend keyword -- there is no secret "this" parameter
+
+ostream vs ofstream vs cout ---differences
+    inheritance
+
+ostream vs ifstream vs cin ---differences
+    inheritance
+
+insertion operator <<
+
+    (*forget it can shift)
+
+extraction operator >>
+
+example:
+
+class A{
+    public:
+    void foo(){
+    }
+
+    A(int x){
+
+    }
+};
+
+classB:publicA{
+    void foo(){
+
+    A::foo();   use of void foo from class A
+    }
+
+    B(int y):A(y){ call the constructor from class A( superclass of B? check this)
+
+    }
+}:
+
+what is here subclass, superclass, use of :: to specify which function and data to access!!!
+check what is superclass, subclass and :: 
+
+example2:
+
+class A{
+
+    A(int x=10){
+        num=x;
+    }
+
+    void output(ostream &out){
+        out <<num;
+    }
+};
+
+class B{
+
+    B(int y=0)::A(y){
+
+    }
+};
+
+int main(){
+
+B b;   default constructor no changiing of variable
+
+b.output ----- it will output 0
+
+B b(11);
+
+b.output ----- now it would output 11
+}
+
+pass by reference vs pass by value -----differences
+
+recursion
+    2 requirements for recursion
+        1. calls itself (if indirectly)
+        2 a clear stopping condition
+
+fibonachi
+integration
+tic-tac-toe (game possibilities)
+
+C Fair Game Easy points
+    pass by reference vs pass by value
+    scope of a variable (what if all are named the same?)
+    
+
+
+reading code
+
+    compile so no errors
+    he will give examples simillar in nature but not identical to ones from class (animals example)
+
+    ostream insertion <<  overloading for purpose of output
+    istream extraction >> overloading for purpose of input
+
+writting code
+
+    look like a kattis but without the hard thinking
+
+
+output is 
+test 
+test2-test3
+

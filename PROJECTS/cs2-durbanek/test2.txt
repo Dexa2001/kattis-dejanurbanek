@@ -1,0 +1,92 @@
+TEST 2
+
+50% multiple choice
+50% coding
+    reading code
+    implementing a removed function ( calculator function)
+    complete coding of a set of classes
+
+Inheritance
+    -objects are similar
+    -see previous notes for public private and other
+
+Aggregation
+    -objects are made of other objects
+
+    class c{
+        B bar;
+        A animal;
+        A animals[10];
+    };
+
+Keywords:
+
+    -virtual
+    -pure virtual functions
+    -virtual void fun()=0
+    -new and delete
+        A *pa;
+        pa = new A();
+        ....
+        delete pa;
+
+    -template - algorithm is what is transfered
+
+Vocabulary
+
+    abstract class
+        -At least one pure virtual function
+        -and at least one is implemented
+
+        class A{
+            public:
+            virtuqal void fun1()=0;
+            virtual void show() {cout<< "Hello"<<endl;}
+        };
+        
+            -cannot declare and instance of A    A a;
+            -can declare a pointer to A          A *lpa;
+            -not all functions have implementations
+
+    pure virtual functions
+       - A virtual function without implementation
+        -virtual void fun1()=0;
+      
+    pure virtual class
+        -no functions has an implementation
+
+        class A{
+            public:
+            virtual void fun1()=0;
+            virtual void show()=0;
+        };
+
+    concrete class
+
+        -all function have implementations
+        -there has to be some implementation, can not set function to 0
+
+*understand why is each class virtual, abstract....
+
+Vector
+
+Stack ---> last in first out
+    understand the implementation of 
+        push, pop  -->modified the stack
+
+        top --> modifies but doesnt return anything
+
+        class Stack{
+            vector<int> values;
+            public:
+            int pop(){
+            }
+            STL
+            void pop(){
+            }
+            int top(){
+            }
+        }
+- understand how to write 
+
+Queue ---> first in first out

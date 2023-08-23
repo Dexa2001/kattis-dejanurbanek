@@ -1,0 +1,89 @@
+TEST 3
+
+75% CODING
+    Full CODING
+        Class inheritance Structure
+
+    To Do CODING
+        large amount of code given
+        -you are tasked with writting a function implementation or two
+            **singly or doubly linked list examples
+
+25% MULTIPLE CHOICE
+    15-20 QUESTIONS
+        - pure virtual function  -> no function implementation                  //understand keywords
+        - virtual function 
+        - concrete
+        - abstract
+        - little coding examples and to figure out output
+        - pointers
+        - Map class     - is Binary tree of values, key values that are efficient to find
+                    overloads [] operator so any time can be in the []          // [] -- brackets , bracket array
+
+        - Pair class    - every element is a pair, welding two types together  (lazy form to not use class keyword)
+        - less < template ... (compare class)
+            need for the key in a map
+    
+    Topics:
+    
+    -Linked list
+ 
+        -recognize a LINKED list:               //replacement for array stack
+
+        SINGLY LINKED list
+
+            class A {
+                ...
+                A *n or *next               //this shows as it si SINGLY linked list
+            };
+
+            insert order of computation 0(1)    // one for insert
+            find order of computation 0(n)      // order n, linear, or go to the middle
+            deleting an element where we have a pointer  0(1) 
+
+            LIFO kind of operations (last in first out)
+
+
+        DOUBLY LINKED list
+
+            class A{
+                ...
+
+                A *prev, *next;             // could be DOUBLY linked list ( but also could be binary tree)
+            };
+
+            insert order of computation 0(1)    // one for insert
+            find order of computation 0(n)      // order n, linear, or go to the middle
+            deleting an element where we have a pointer  0(1) 
+            delete the head 0(1)
+            INserting at the tail 0(1)
+
+            FIFO kind of operations (first iin first out)           // replacement fo array queue
+
+
+        Binary tree                 
+
+            class A{
+                ...
+                A *p, *n;
+                insert(const A *other){
+                    if(other < *this){
+
+                    }
+                }
+            };
+
+        Enforcing and order on the elements of a set
+        INserting 0(log(n)) finding the correct place to insert
+        deleting 0(log(n))
+        finding 0(log(n))
+
+
+Coding side
+    look through and "understand" code poster to news in the D2L
+        delete the implementation
+
+** shallow and deep copy
+
+
+    
