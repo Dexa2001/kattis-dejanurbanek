@@ -1,0 +1,45 @@
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "mavaquatics2026",
+          "appId": "1:315211558842:android:ce2dcc856eb2611a163783",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "ios": {
+        "default": {
+          "projectId": "mavaquatics2026",
+          "appId": "1:315211558842:ios:9a9351d953a80222163783",
+          "uploadDebugSymbols": false,
+          "fileOutput": "ios/Runner/GoogleService-Info.plist"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "mavaquatics2026",
+          "configurations": {
+            "android": "1:315211558842:android:ce2dcc856eb2611a163783",
+            "ios": "1:315211558842:ios:9a9351d953a80222163783",
+            "web": "1:315211558842:web:3471bcf3a369cf14163783"
+          }
+        }
+      }
+    }
+  },
+  "hosting": {
+    "public": "build/web",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  }
+}
