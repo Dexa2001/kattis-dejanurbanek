@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "302717697075",
+    "project_id": "swim-force-plus",
+    "storage_bucket": "swim-force-plus.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:302717697075:android:ad5e9fc6430df10044b746",
+        "android_client_info": {
+          "package_name": "com.example.start_force"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDHLtwj85JDS0mW_CFHSdaXZglRHQzEGVQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
