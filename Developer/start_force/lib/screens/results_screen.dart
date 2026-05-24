@@ -3,8 +3,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-import 'test_detail_screen.dart';
 import '../services/pdf_report_service.dart';
+import '../services/six_fifty_pdf_service.dart';
+import 'six_fifty_test_detail_screen.dart';
+import 'test_detail_screen.dart';
 
 class ResultsScreen extends StatefulWidget {
   const ResultsScreen({super.key});
@@ -16,6 +18,7 @@ class ResultsScreen extends StatefulWidget {
 class _ResultsScreenState extends State<ResultsScreen> {
   final uid = FirebaseAuth.instance.currentUser?.uid;
 
+  String selectedType = 'force';
   String searchText = '';
   String sortMode = 'Newest';
 
@@ -29,18 +32,26 @@ class _ResultsScreenState extends State<ResultsScreen> {
     final raw = test['testStartedAt'];
     final parsed = DateTime.tryParse(raw?.toString() ?? '');
 
-    if (parsed == null) return 'Unknown date';
+    if (parsed != null) {
+      return DateFormat('MMM d, yyyy • h:mm a').format(parsed);
+    }
 
-    return DateFormat('MMM d, yyyy • h:mm a').format(parsed);
+    final createdAt = test['createdAt'];
+    if (createdAt is Timestamp) {
+      return DateFormat('MMM d, yyyy • h:mm a').format(createdAt.toDate());
+    }
+
+    return 'Unknown date';
   }
 
-  List<QueryDocumentSnapshot> sortedAndFiltered(List<QueryDocumentSnapshot> docs) {
+  List<QueryDocumentSnapshot> sortedAndFilteredForce(
+    List<QueryDocumentSnapshot> docs,
+  ) {
     final filtered = docs.where((doc) {
       final data = doc.data() as Map<String, dynamic>;
       final swimmerName = (data['swimmerName'] ?? '').toString().toLowerCase();
 
       if (searchText.trim().isEmpty) return true;
-
       return swimmerName.contains(searchText.toLowerCase());
     }).toList();
 
@@ -49,20 +60,26 @@ class _ResultsScreenState extends State<ResultsScreen> {
       final bData = b.data() as Map<String, dynamic>;
 
       if (sortMode == 'Highest Peak') {
-        return number(bData['totalPeakKgf']).compareTo(number(aData['totalPeakKgf']));
+        return number(
+          bData['totalPeakKgf'],
+        ).compareTo(number(aData['totalPeakKgf']));
       }
 
       if (sortMode == 'Best RFD') {
-        return number(bData['rfdKgfPerSecond']).compareTo(number(aData['rfdKgfPerSecond']));
+        return number(
+          bData['rfdKgfPerSecond'],
+        ).compareTo(number(aData['rfdKgfPerSecond']));
       }
 
       if (sortMode == 'Best Balance') {
-        final aDiff = (number(aData['balanceFrontPercent']) -
-                number(aData['balanceBackPercent']))
-            .abs();
-        final bDiff = (number(bData['balanceFrontPercent']) -
-                number(bData['balanceBackPercent']))
-            .abs();
+        final aDiff =
+            (number(aData['balanceFrontPercent']) -
+                    number(aData['balanceBackPercent']))
+                .abs();
+        final bDiff =
+            (number(bData['balanceFrontPercent']) -
+                    number(bData['balanceBackPercent']))
+                .abs();
 
         return aDiff.compareTo(bDiff);
       }
@@ -73,15 +90,286 @@ class _ResultsScreenState extends State<ResultsScreen> {
     return filtered;
   }
 
-  void openTest(QueryDocumentSnapshot doc) {
+  List<QueryDocumentSnapshot> filteredSixFifty(List<QueryDocumentSnapshot> docs) {
+    return docs.where((doc) {
+      final data = doc.data() as Map<String, dynamic>;
+      final group = (data['groupName'] ?? '').toString().toLowerCase();
+      final course = (data['course'] ?? '').toString().toLowerCase();
+      final date = (data['testDate'] ?? '').toString().toLowerCase();
+
+      if (searchText.trim().isEmpty) return true;
+
+      final q = searchText.toLowerCase();
+      return group.contains(q) || course.contains(q) || date.contains(q);
+    }).toList();
+  }
+
+  void openForceTest(QueryDocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
 
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => TestDetailScreen(
-          testData: data,
-          testId: doc.id,
+        builder: (_) => TestDetailScreen(testData: data, testId: doc.id),
+      ),
+    );
+  }
+
+  void openSixFiftyDetail(String testId, Map<String, dynamic> data) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => SixFiftyTestDetailScreen(testId: testId, testData: data),
+      ),
+    );
+  }
+
+  Future<void> deleteForceTest(QueryDocumentSnapshot doc) async {
+    if (uid == null) return;
+
+    final data = doc.data() as Map<String, dynamic>;
+    final swimmerName = data['swimmerName'] ?? 'this test';
+
+    final confirm = await showDeleteDialog(
+      title: 'Delete Force Test',
+      body: 'Are you sure you want to delete $swimmerName force test?',
+    );
+
+    if (!confirm) return;
+
+    final batch = FirebaseFirestore.instance.batch();
+
+    batch.delete(
+      FirebaseFirestore.instance
+          .collection('coaches')
+          .doc(uid)
+          .collection('tests')
+          .doc(doc.id),
+    );
+
+    final swimmerId = data['swimmerId']?.toString();
+    if (swimmerId != null && swimmerId.isNotEmpty) {
+      batch.delete(
+        FirebaseFirestore.instance
+            .collection('coaches')
+            .doc(uid)
+            .collection('swimmers')
+            .doc(swimmerId)
+            .collection('tests')
+            .doc(doc.id),
+      );
+    }
+
+    await batch.commit();
+
+    if (!mounted) return;
+    showMessage('Force test deleted.');
+  }
+
+  Future<void> deleteSixFiftyTest(String testId, Map<String, dynamic> data) async {
+    if (uid == null) return;
+
+    final confirm = await showDeleteDialog(
+      title: 'Delete 6×50 Test',
+      body: 'Are you sure you want to delete this 6×50 test?',
+    );
+
+    if (!confirm) return;
+
+    final rows = data['rows'] as List<dynamic>? ?? [];
+    final batch = FirebaseFirestore.instance.batch();
+
+    batch.delete(
+      FirebaseFirestore.instance
+          .collection('coaches')
+          .doc(uid)
+          .collection('sixFiftyTests')
+          .doc(testId),
+    );
+
+    for (final item in rows) {
+      if (item is! Map) continue;
+
+      final swimmerId = item['swimmerId']?.toString();
+      if (swimmerId == null || swimmerId.isEmpty) continue;
+
+      batch.delete(
+        FirebaseFirestore.instance
+            .collection('coaches')
+            .doc(uid)
+            .collection('swimmers')
+            .doc(swimmerId)
+            .collection('sixFiftyTests')
+            .doc(testId),
+      );
+    }
+
+    await batch.commit();
+
+    if (!mounted) return;
+    showMessage('6×50 test deleted.');
+  }
+
+  Future<bool> showDeleteDialog({
+    required String title,
+    required String body,
+  }) async {
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        backgroundColor: const Color(0xFF061226),
+        title: Text(title),
+        content: Text(body),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton.icon(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            onPressed: () => Navigator.pop(context, true),
+            icon: const Icon(Icons.delete),
+            label: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+
+    return result == true;
+  }
+
+  void showMessage(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
+  }
+
+  Widget pageHeader() {
+    return Row(
+      children: [
+        IconButton(
+          onPressed: () => Navigator.pop(context),
+          icon: const Icon(Icons.arrow_back),
+        ),
+        const SizedBox(width: 8),
+        const Expanded(
+          child: Text(
+            'Results',
+            style: TextStyle(fontSize: 38, fontWeight: FontWeight.bold),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget resultTypeSelector() {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final compact = constraints.maxWidth < 760;
+
+        final cards = [
+          typeCard(
+            keyValue: 'force',
+            title: 'Force Tests',
+            subtitle: 'View force plate testing history',
+            icon: Icons.bolt,
+            color: const Color(0xFF1976FF),
+          ),
+          typeCard(
+            keyValue: 'sixFifty',
+            title: '6×50 Tests',
+            subtitle: 'View group swim prediction reports',
+            icon: Icons.pool_rounded,
+            color: const Color(0xFF00B8A9),
+          ),
+        ];
+
+        if (compact) {
+          return Column(
+            children: [
+              cards[0],
+              const SizedBox(height: 14),
+              cards[1],
+            ],
+          );
+        }
+
+        return Row(
+          children: [
+            Expanded(child: cards[0]),
+            const SizedBox(width: 16),
+            Expanded(child: cards[1]),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget typeCard({
+    required String keyValue,
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required Color color,
+  }) {
+    final selected = selectedType == keyValue;
+
+    return InkWell(
+      borderRadius: BorderRadius.circular(24),
+      onTap: () {
+        setState(() {
+          selectedType = keyValue;
+          searchText = '';
+          sortMode = 'Newest';
+        });
+      },
+      child: Container(
+        padding: const EdgeInsets.all(22),
+        decoration: BoxDecoration(
+          color: selected ? color : const Color(0xFF111C2E),
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(
+            color: selected ? Colors.white24 : Colors.white10,
+            width: selected ? 1.4 : 1,
+          ),
+          boxShadow: selected
+              ? [
+                  BoxShadow(
+                    color: color.withValues(alpha: 0.25),
+                    blurRadius: 24,
+                    offset: const Offset(0, 12),
+                  ),
+                ]
+              : [],
+        ),
+        child: Row(
+          children: [
+            Icon(icon, color: Colors.white, size: 38),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 5),
+                  Text(
+                    subtitle,
+                    style: const TextStyle(color: Colors.white70),
+                  ),
+                ],
+              ),
+            ),
+            Icon(
+              selected ? Icons.check_circle : Icons.chevron_right,
+              color: Colors.white,
+            ),
+          ],
         ),
       ),
     );
@@ -106,7 +394,10 @@ class _ResultsScreenState extends State<ResultsScreen> {
                 const SizedBox(height: 6),
                 Text(
                   value,
-                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ],
             ),
@@ -116,10 +407,8 @@ class _ResultsScreenState extends State<ResultsScreen> {
     );
   }
 
-  Widget topAnalytics(List<QueryDocumentSnapshot> tests) {
-    if (tests.isEmpty) {
-      return const SizedBox();
-    }
+  Widget forceAnalytics(List<QueryDocumentSnapshot> tests) {
+    if (tests.isEmpty) return const SizedBox();
 
     double bestPeak = 0;
     double bestRfd = 0;
@@ -144,44 +433,126 @@ class _ResultsScreenState extends State<ResultsScreen> {
 
     return LayoutBuilder(
       builder: (context, constraints) {
+        final cards = [
+          statCard(
+            'Total Tests',
+            '${tests.length}',
+            Icons.assignment,
+            const Color(0xFF1976FF),
+          ),
+          statCard(
+            'Best Peak',
+            '${bestPeak.toStringAsFixed(1)} kgf',
+            Icons.bolt,
+            Colors.orange,
+          ),
+          statCard(
+            'Best RFD',
+            '${bestRfd.toStringAsFixed(1)} kgf/s',
+            Icons.speed,
+            const Color(0xFF00B8A9),
+          ),
+          statCard(
+            'Team Symmetry',
+            '${teamSymmetry.toStringAsFixed(0)} / 100',
+            Icons.balance,
+            const Color(0xFF6C4DFF),
+          ),
+        ];
+
         if (constraints.maxWidth < 900) {
           return Column(
-            children: [
-              statCard('Total Tests', '${tests.length}', Icons.assignment, const Color(0xFF1976FF)),
-              const SizedBox(height: 14),
-              statCard('Best Peak', '${bestPeak.toStringAsFixed(1)} kgf', Icons.bolt, Colors.orange),
-              const SizedBox(height: 14),
-              statCard('Best RFD', '${bestRfd.toStringAsFixed(1)} kgf/s', Icons.speed, const Color(0xFF00B8A9)),
-              const SizedBox(height: 14),
-              statCard('Team Symmetry', '${teamSymmetry.toStringAsFixed(0)} / 100', Icons.balance, const Color(0xFF6C4DFF)),
-            ],
+            children: cards
+                .map(
+                  (card) => Padding(
+                    padding: const EdgeInsets.only(bottom: 14),
+                    child: card,
+                  ),
+                )
+                .toList(),
           );
         }
 
         return Row(
           children: [
-            Expanded(child: statCard('Total Tests', '${tests.length}', Icons.assignment, const Color(0xFF1976FF))),
-            const SizedBox(width: 14),
-            Expanded(child: statCard('Best Peak', '${bestPeak.toStringAsFixed(1)} kgf', Icons.bolt, Colors.orange)),
-            const SizedBox(width: 14),
-            Expanded(child: statCard('Best RFD', '${bestRfd.toStringAsFixed(1)} kgf/s', Icons.speed, const Color(0xFF00B8A9))),
-            const SizedBox(width: 14),
-            Expanded(child: statCard('Team Symmetry', '${teamSymmetry.toStringAsFixed(0)} / 100', Icons.balance, const Color(0xFF6C4DFF))),
+            for (int i = 0; i < cards.length; i++) ...[
+              Expanded(child: cards[i]),
+              if (i != cards.length - 1) const SizedBox(width: 14),
+            ],
           ],
         );
       },
     );
   }
 
-  Widget filters() {
+  Widget sixFiftyAnalytics(List<QueryDocumentSnapshot> tests) {
+    int totalSwims = 0;
+
+    for (final doc in tests) {
+      final data = doc.data() as Map<String, dynamic>;
+      final rows = data['rows'] as List<dynamic>? ?? [];
+      totalSwims += rows.length;
+    }
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final cards = [
+          statCard(
+            '6×50 Tests',
+            '${tests.length}',
+            Icons.pool_rounded,
+            const Color(0xFF00B8A9),
+          ),
+          statCard(
+            'Total Swims',
+            '$totalSwims',
+            Icons.groups_rounded,
+            const Color(0xFF1976FF),
+          ),
+          statCard(
+            'Report Type',
+            'Prediction',
+            Icons.summarize_rounded,
+            Colors.orange,
+          ),
+        ];
+
+        if (constraints.maxWidth < 900) {
+          return Column(
+            children: cards
+                .map(
+                  (card) => Padding(
+                    padding: const EdgeInsets.only(bottom: 14),
+                    child: card,
+                  ),
+                )
+                .toList(),
+          );
+        }
+
+        return Row(
+          children: [
+            for (int i = 0; i < cards.length; i++) ...[
+              Expanded(child: cards[i]),
+              if (i != cards.length - 1) const SizedBox(width: 14),
+            ],
+          ],
+        );
+      },
+    );
+  }
+
+  Widget filters({required bool includeSort}) {
     return LayoutBuilder(
       builder: (context, constraints) {
         if (constraints.maxWidth < 750) {
           return Column(
             children: [
               searchField(),
-              const SizedBox(height: 12),
-              sortDropdown(),
+              if (includeSort) ...[
+                const SizedBox(height: 12),
+                sortDropdown(),
+              ],
             ],
           );
         }
@@ -189,8 +560,10 @@ class _ResultsScreenState extends State<ResultsScreen> {
         return Row(
           children: [
             Expanded(child: searchField()),
-            const SizedBox(width: 14),
-            SizedBox(width: 230, child: sortDropdown()),
+            if (includeSort) ...[
+              const SizedBox(width: 14),
+              SizedBox(width: 230, child: sortDropdown()),
+            ],
           ],
         );
       },
@@ -199,17 +572,15 @@ class _ResultsScreenState extends State<ResultsScreen> {
 
   Widget searchField() {
     return TextField(
-      onChanged: (value) {
-        setState(() => searchText = value);
-      },
+      onChanged: (value) => setState(() => searchText = value),
       decoration: InputDecoration(
         prefixIcon: const Icon(Icons.search),
-        labelText: 'Search swimmer',
+        labelText: selectedType == 'force'
+            ? 'Search swimmer'
+            : 'Search group, course, or date',
         filled: true,
         fillColor: const Color(0xFF111C2E),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(18),
-        ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(18)),
       ),
     );
   }
@@ -222,9 +593,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
         labelText: 'Sort By',
         filled: true,
         fillColor: const Color(0xFF111C2E),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(18),
-        ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(18)),
       ),
       items: const [
         DropdownMenuItem(value: 'Newest', child: Text('Newest')),
@@ -239,7 +608,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
     );
   }
 
-  Widget resultCard(QueryDocumentSnapshot doc) {
+  Widget forceResultCard(QueryDocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
 
     final swimmerName = data['swimmerName'] ?? 'Unknown Swimmer';
@@ -261,7 +630,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
         borderRadius: BorderRadius.circular(22),
       ),
       child: ListTile(
-        onTap: () => openTest(doc),
+        onTap: () => openForceTest(doc),
         contentPadding: const EdgeInsets.all(18),
         leading: CircleAvatar(
           radius: 28,
@@ -287,20 +656,264 @@ class _ResultsScreenState extends State<ResultsScreen> {
           ),
         ),
         isThreeLine: true,
+        trailing: actionButtons(
+          balanceColor: balanceColor,
+          onView: () => openForceTest(doc),
+          onPrint: () => PdfReportService.printReport(testData: data),
+          onDelete: () => deleteForceTest(doc),
+        ),
+      ),
+    );
+  }
+
+  Widget actionButtons({
+    required Color balanceColor,
+    required VoidCallback onView,
+    required VoidCallback onPrint,
+    required VoidCallback onDelete,
+  }) {
+    return Wrap(
+      spacing: 2,
+      children: [
+        IconButton(
+          tooltip: 'Balance status',
+          icon: Icon(Icons.balance, color: balanceColor),
+          onPressed: onView,
+        ),
+        IconButton(
+          tooltip: 'Print PDF',
+          icon: const Icon(Icons.print, color: Colors.white70),
+          onPressed: onPrint,
+        ),
+        IconButton(
+          tooltip: 'Delete',
+          icon: const Icon(Icons.delete, color: Colors.redAccent),
+          onPressed: onDelete,
+        ),
+        IconButton(
+          tooltip: 'View Details',
+          icon: const Icon(Icons.chevron_right, color: Colors.white70),
+          onPressed: onView,
+        ),
+      ],
+    );
+  }
+
+  Widget sixFiftyCard(QueryDocumentSnapshot doc) {
+    final data = doc.data() as Map<String, dynamic>;
+    final rows = data['rows'] as List<dynamic>? ?? [];
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 14),
+      decoration: BoxDecoration(
+        color: const Color(0xFF111C2E),
+        borderRadius: BorderRadius.circular(22),
+      ),
+      child: ListTile(
+        onTap: () => openSixFiftyDetail(doc.id, data),
+        contentPadding: const EdgeInsets.all(18),
+        leading: const CircleAvatar(
+          radius: 28,
+          backgroundColor: Color(0xFF00B8A9),
+          child: Icon(Icons.pool_rounded, color: Colors.white),
+        ),
+        title: Text(
+          '${data['groupName'] ?? 'Group'} • ${data['course'] ?? ''}',
+          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+        ),
+        subtitle: Padding(
+          padding: const EdgeInsets.only(top: 8),
+          child: Text(
+            '${data['testDate'] ?? 'Unknown date'}\n'
+            '${rows.length} swimmers saved',
+            style: const TextStyle(color: Colors.white60),
+          ),
+        ),
+        isThreeLine: true,
         trailing: Wrap(
-          spacing: 6,
+          spacing: 2,
           children: [
-            Icon(Icons.balance, color: balanceColor),
+            IconButton(
+              tooltip: 'View Report',
+              icon: const Icon(Icons.visibility, color: Colors.white70),
+              onPressed: () => openSixFiftyDetail(doc.id, data),
+            ),
             IconButton(
               tooltip: 'Print PDF',
-              icon: const Icon(Icons.print),
-              onPressed: () {
-                PdfReportService.printReport(testData: data);
-              },
+              icon: const Icon(Icons.print, color: Colors.white70),
+              onPressed: () => SixFiftyPdfService.printReport(testData: data),
             ),
-            const Icon(Icons.chevron_right),
+            IconButton(
+              tooltip: 'Delete',
+              icon: const Icon(Icons.delete, color: Colors.redAccent),
+              onPressed: () => deleteSixFiftyTest(doc.id, data),
+            ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget forceResultsSection() {
+    if (uid == null) return const SizedBox();
+
+    return StreamBuilder<QuerySnapshot>(
+      stream: FirebaseFirestore.instance
+          .collection('coaches')
+          .doc(uid)
+          .collection('tests')
+          .orderBy('createdAt', descending: true)
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return errorText('Could not load force results:\n${snapshot.error}');
+        }
+
+        if (!snapshot.hasData) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        final allTests = snapshot.data!.docs;
+        final tests = sortedAndFilteredForce(allTests);
+
+        if (allTests.isEmpty) {
+          return emptyState(
+            title: 'No force results yet',
+            body: 'Run and save a force test to start building result history.',
+            icon: Icons.bar_chart_rounded,
+          );
+        }
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            forceAnalytics(allTests),
+            const SizedBox(height: 24),
+            filters(includeSort: true),
+            const SizedBox(height: 24),
+            Text(
+              '${tests.length} result${tests.length == 1 ? '' : 's'} shown',
+              style: const TextStyle(color: Colors.white60),
+            ),
+            const SizedBox(height: 14),
+            ...tests.map(forceResultCard),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget sixFiftyResultsSection() {
+    if (uid == null) return const SizedBox();
+
+    return StreamBuilder<QuerySnapshot>(
+      stream: FirebaseFirestore.instance
+          .collection('coaches')
+          .doc(uid)
+          .collection('sixFiftyTests')
+          .orderBy('createdAt', descending: true)
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return errorText('Could not load 6×50 results:\n${snapshot.error}');
+        }
+
+        if (!snapshot.hasData) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        final allTests = snapshot.data!.docs;
+        final tests = filteredSixFifty(allTests);
+
+        if (allTests.isEmpty) {
+          return emptyState(
+            title: 'No 6×50 results yet',
+            body: 'Save a 6×50 test to view reports here.',
+            icon: Icons.pool_rounded,
+          );
+        }
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            sixFiftyAnalytics(allTests),
+            const SizedBox(height: 24),
+            filters(includeSort: false),
+            const SizedBox(height: 24),
+            Text(
+              '${tests.length} 6×50 report${tests.length == 1 ? '' : 's'} shown',
+              style: const TextStyle(color: Colors.white60),
+            ),
+            const SizedBox(height: 14),
+            dateBubbleRow(tests),
+            const SizedBox(height: 18),
+            ...tests.map(sixFiftyCard),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget dateBubbleRow(List<QueryDocumentSnapshot> tests) {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: tests.map((doc) {
+          final data = doc.data() as Map<String, dynamic>;
+
+          return Padding(
+            padding: const EdgeInsets.only(right: 10),
+            child: ActionChip(
+              backgroundColor: const Color(0xFF061226),
+              side: const BorderSide(color: Colors.white24),
+              avatar: const Icon(
+                Icons.calendar_month,
+                size: 18,
+                color: Color(0xFF00B8A9),
+              ),
+              label: Text(
+                '${data['testDate'] ?? 'Date'} • ${data['groupName'] ?? 'Group'}',
+              ),
+              onPressed: () => openSixFiftyDetail(doc.id, data),
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+
+  Widget errorText(String message) {
+    return Text(message, style: const TextStyle(color: Colors.redAccent));
+  }
+
+  Widget emptyState({
+    required String title,
+    required String body,
+    required IconData icon,
+  }) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(30),
+      decoration: BoxDecoration(
+        color: const Color(0xFF111C2E),
+        borderRadius: BorderRadius.circular(24),
+      ),
+      child: Column(
+        children: [
+          Icon(icon, size: 60, color: Colors.white70),
+          const SizedBox(height: 18),
+          Text(
+            title,
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            body,
+            textAlign: TextAlign.center,
+            style: const TextStyle(color: Colors.white70),
+          ),
+        ],
       ),
     );
   }
@@ -308,9 +921,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
   @override
   Widget build(BuildContext context) {
     if (uid == null) {
-      return const Scaffold(
-        body: Center(child: Text('No user logged in')),
-      );
+      return const Scaffold(body: Center(child: Text('No user logged in')));
     }
 
     return Scaffold(
@@ -320,96 +931,16 @@ class _ResultsScreenState extends State<ResultsScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                children: [
-                  IconButton(
-                    onPressed: () => Navigator.pop(context),
-                    icon: const Icon(Icons.arrow_back),
-                  ),
-                  const SizedBox(width: 8),
-                  const Expanded(
-                    child: Text(
-                      'Results',
-                      style: TextStyle(fontSize: 38, fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                ],
-              ),
-
+              pageHeader(),
               const SizedBox(height: 24),
-
-              StreamBuilder<QuerySnapshot>(
-                stream: FirebaseFirestore.instance
-                    .collection('coaches')
-                    .doc(uid)
-                    .collection('tests')
-                    .orderBy('createdAt', descending: true)
-                    .snapshots(),
-                builder: (context, snapshot) {
-                  if (snapshot.hasError) {
-                    return Text(
-                      'Could not load results:\n${snapshot.error}',
-                      style: const TextStyle(color: Colors.redAccent),
-                    );
-                  }
-
-                  if (!snapshot.hasData) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
-
-                  final allTests = snapshot.data!.docs;
-                  final tests = sortedAndFiltered(allTests);
-
-                  if (allTests.isEmpty) {
-                    return emptyState();
-                  }
-
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      topAnalytics(allTests),
-                      const SizedBox(height: 24),
-                      filters(),
-                      const SizedBox(height: 24),
-                      Text(
-                        '${tests.length} result${tests.length == 1 ? '' : 's'} shown',
-                        style: const TextStyle(color: Colors.white60),
-                      ),
-                      const SizedBox(height: 14),
-                      ...tests.map(resultCard),
-                    ],
-                  );
-                },
-              ),
+              resultTypeSelector(),
+              const SizedBox(height: 26),
+              selectedType == 'force'
+                  ? forceResultsSection()
+                  : sixFiftyResultsSection(),
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  Widget emptyState() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(30),
-      decoration: BoxDecoration(
-        color: const Color(0xFF111C2E),
-        borderRadius: BorderRadius.circular(24),
-      ),
-      child: const Column(
-        children: [
-          Icon(Icons.bar_chart_rounded, size: 60, color: Colors.white70),
-          SizedBox(height: 18),
-          Text(
-            'No results yet',
-            style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
-          ),
-          SizedBox(height: 8),
-          Text(
-            'Run and save a test to start building result history.',
-            style: TextStyle(color: Colors.white70),
-          ),
-        ],
       ),
     );
   }

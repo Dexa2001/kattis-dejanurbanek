@@ -16,17 +16,18 @@ class ProgressScreen extends StatefulWidget {
 
 class _ProgressScreenState extends State<ProgressScreen> {
   QueryDocumentSnapshot? findTestById(
-  List<QueryDocumentSnapshot> tests,
-  String? id,
-) {
-  if (id == null) return null;
+    List<QueryDocumentSnapshot> tests,
+    String? id,
+  ) {
+    if (id == null) return null;
 
-  for (final test in tests) {
-    if (test.id == id) return test;
+    for (final test in tests) {
+      if (test.id == id) return test;
+    }
+
+    return null;
   }
 
-  return null;
-}
   final uid = FirebaseAuth.instance.currentUser?.uid;
 
   String selectedMode = 'Team';
@@ -48,7 +49,6 @@ class _ProgressScreenState extends State<ProgressScreen> {
   }
 
   String formatDate(Map<String, dynamic> test) {
-    
     final raw = test['testStartedAt'];
     final parsed = DateTime.tryParse(raw?.toString() ?? '');
 
@@ -64,12 +64,13 @@ class _ProgressScreenState extends State<ProgressScreen> {
 
     return 'Unknown date';
   }
-  String latestTestDate(List<QueryDocumentSnapshot> tests) {
-  if (tests.isEmpty) return 'No tests yet';
 
-  final data = tests.first.data() as Map<String, dynamic>;
-  return 'Last test on ${formatDate(data)}';
-}
+  String latestTestDate(List<QueryDocumentSnapshot> tests) {
+    if (tests.isEmpty) return 'No tests yet';
+
+    final data = tests.first.data() as Map<String, dynamic>;
+    return 'Last test on ${formatDate(data)}';
+  }
 
   String formatShortDate(Map<String, dynamic> test) {
     final raw = test['testStartedAt'];
@@ -113,7 +114,9 @@ class _ProgressScreenState extends State<ProgressScreen> {
     return (belowOrEqual / allValues.length) * 100;
   }
 
-  List<QueryDocumentSnapshot> filterTests(List<QueryDocumentSnapshot> allTests) {
+  List<QueryDocumentSnapshot> filterTests(
+    List<QueryDocumentSnapshot> allTests,
+  ) {
     if (selectedMode == 'Swimmer' && selectedSwimmerId != null) {
       return allTests.where((doc) {
         final data = doc.data() as Map<String, dynamic>;
@@ -138,7 +141,9 @@ class _ProgressScreenState extends State<ProgressScreen> {
     if (tests.isEmpty) return 0;
 
     return tests
-        .map((doc) => number((doc.data() as Map<String, dynamic>)['totalPeakKgf']))
+        .map(
+          (doc) => number((doc.data() as Map<String, dynamic>)['totalPeakKgf']),
+        )
         .reduce((a, b) => a > b ? a : b);
   }
 
@@ -164,13 +169,19 @@ class _ProgressScreenState extends State<ProgressScreen> {
 
     final avgPeak = average(
       tests
-          .map((doc) => number((doc.data() as Map<String, dynamic>)['totalPeakKgf']))
+          .map(
+            (doc) =>
+                number((doc.data() as Map<String, dynamic>)['totalPeakKgf']),
+          )
           .toList(),
     );
 
     final avgRfd = average(
       tests
-          .map((doc) => number((doc.data() as Map<String, dynamic>)['rfdKgfPerSecond']))
+          .map(
+            (doc) =>
+                number((doc.data() as Map<String, dynamic>)['rfdKgfPerSecond']),
+          )
           .toList(),
     );
 
@@ -199,10 +210,11 @@ class _ProgressScreenState extends State<ProgressScreen> {
 
     final latest = latestPeak(tests);
 
-    final previous = tests.skip(1).take(3).map((doc) {
-      final data = doc.data() as Map<String, dynamic>;
-      return number(data['totalPeakKgf']);
-    }).toList();
+    final previous =
+        tests.skip(1).take(3).map((doc) {
+          final data = doc.data() as Map<String, dynamic>;
+          return number(data['totalPeakKgf']);
+        }).toList();
 
     final previousAvg = average(previous);
 
@@ -229,11 +241,12 @@ class _ProgressScreenState extends State<ProgressScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => TestDetailScreen(
-          testData: data,
-          swimmerData: selectedSwimmer,
-          testId: doc.id,
-        ),
+        builder:
+            (_) => TestDetailScreen(
+              testData: data,
+              swimmerData: selectedSwimmer,
+              testId: doc.id,
+            ),
       ),
     );
   }
@@ -268,10 +281,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
               dropdownColor: const Color(0xFF111C2E),
               isExpanded: true,
               items: const [
-                DropdownMenuItem(
-                  value: 'Team',
-                  child: Text('Team Analytics'),
-                ),
+                DropdownMenuItem(value: 'Team', child: Text('Team Analytics')),
                 DropdownMenuItem(
                   value: 'Swimmer',
                   child: Text('Individual Swimmer'),
@@ -295,72 +305,76 @@ class _ProgressScreenState extends State<ProgressScreen> {
           ),
         );
 
-        final swimmerBox = selectedMode == 'Swimmer'
-            ? StreamBuilder<QuerySnapshot>(
-                stream: FirebaseFirestore.instance
-                    .collection('coaches')
-                    .doc(uid)
-                    .collection('swimmers')
-                    .orderBy('lastNameLower')
-                    .snapshots(),
-                builder: (context, snapshot) {
-                  if (!snapshot.hasData) {
+        final swimmerBox =
+            selectedMode == 'Swimmer'
+                ? StreamBuilder<QuerySnapshot>(
+                  stream:
+                      FirebaseFirestore.instance
+                          .collection('coaches')
+                          .doc(uid)
+                          .collection('swimmers')
+                          .orderBy('lastNameLower')
+                          .snapshots(),
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) {
+                      return filterContainer(
+                        child: const Text('Loading swimmers...'),
+                      );
+                    }
+
+                    final swimmers = snapshot.data!.docs;
+
                     return filterContainer(
-                      child: const Text('Loading swimmers...'),
-                    );
-                  }
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButton<String>(
+                          value: selectedSwimmerId ?? 'none',
+                          dropdownColor: const Color(0xFF111C2E),
+                          isExpanded: true,
+                          items: [
+                            const DropdownMenuItem(
+                              value: 'none',
+                              child: Text('Select Swimmer'),
+                            ),
+                            ...swimmers.map((doc) {
+                              final data = doc.data() as Map<String, dynamic>;
 
-                  final swimmers = snapshot.data!.docs;
+                              return DropdownMenuItem(
+                                value: doc.id,
+                                child: Text(
+                                  '${data['firstName']} ${data['lastName']}',
+                                ),
+                              );
+                            }),
+                          ],
+                          onChanged: (value) {
+                            if (value == null || value == 'none') {
+                              setState(() {
+                                selectedSwimmerId = null;
+                                selectedSwimmer = null;
+                                compareAId = null;
+                                compareBId = null;
+                              });
+                              return;
+                            }
 
-                  return filterContainer(
-                    child: DropdownButtonHideUnderline(
-                      child: DropdownButton<String>(
-                        value: selectedSwimmerId ?? 'none',
-                        dropdownColor: const Color(0xFF111C2E),
-                        isExpanded: true,
-                        items: [
-                          const DropdownMenuItem(
-                            value: 'none',
-                            child: Text('Select Swimmer'),
-                          ),
-                          ...swimmers.map((doc) {
-                            final data = doc.data() as Map<String, dynamic>;
-
-                            return DropdownMenuItem(
-                              value: doc.id,
-                              child: Text(
-                                '${data['firstName']} ${data['lastName']}',
-                              ),
+                            final doc = swimmers.firstWhere(
+                              (d) => d.id == value,
                             );
-                          }),
-                        ],
-                        onChanged: (value) {
-                          if (value == null || value == 'none') {
+
                             setState(() {
-                              selectedSwimmerId = null;
-                              selectedSwimmer = null;
+                              selectedSwimmerId = value;
+                              selectedSwimmer =
+                                  doc.data() as Map<String, dynamic>;
                               compareAId = null;
                               compareBId = null;
                             });
-                            return;
-                          }
-
-                          final doc = swimmers.firstWhere((d) => d.id == value);
-
-                          setState(() {
-                            selectedSwimmerId = value;
-                            selectedSwimmer =
-                                doc.data() as Map<String, dynamic>;
-                            compareAId = null;
-                            compareBId = null;
-                          });
-                        },
+                          },
+                        ),
                       ),
-                    ),
-                  );
-                },
-              )
-            : const SizedBox();
+                    );
+                  },
+                )
+                : const SizedBox();
 
         if (compact) {
           return Column(
@@ -457,26 +471,16 @@ class _ProgressScreenState extends State<ProgressScreen> {
     final fatigue = fatigueStatus(tests);
     final zone = zoneForPeak(latest);
 
-    final allPeaks = allTests.map((doc) {
-      final data = doc.data() as Map<String, dynamic>;
-      return number(data['totalPeakKgf']);
-    }).toList();
-
-    final percentile = percentileRank(
-      value: latest,
-      allValues: allPeaks,
-    );
-
     return LayoutBuilder(
       builder: (context, constraints) {
         final cards = [
-statCard(
-  title: selectedMode == 'Team' ? 'Tests Logged' : 'Swimmer Tests',
-  value: '${tests.length}',
-  icon: Icons.assignment_turned_in,
-  color: const Color(0xFF1976FF),
-  subtitle: latestTestDate(tests),
-),
+          statCard(
+            title: selectedMode == 'Team' ? 'Tests Logged' : 'Swimmer Tests',
+            value: '${tests.length}',
+            icon: Icons.assignment_turned_in,
+            color: const Color(0xFF1976FF),
+            subtitle: latestTestDate(tests),
+          ),
           statCard(
             title: 'Latest Peak',
             value: '${latest.toStringAsFixed(1)} kgf',
@@ -492,11 +496,11 @@ statCard(
             subtitle: 'RFD ${rfd.toStringAsFixed(1)} kgf/s',
           ),
           statCard(
-            title: 'Percentile',
-            value: '${percentile.toStringAsFixed(0)}%',
-            icon: Icons.leaderboard,
-            color: const Color(0xFF6C4DFF),
-            subtitle: 'Compared to all saved tests',
+            title: 'Force Zone',
+            value: zone,
+            icon: Icons.radar,
+            color: zoneColor(zone),
+            subtitle: 'Current total peak category',
           ),
           statCard(
             title: 'Asymmetry',
@@ -512,39 +516,34 @@ statCard(
             color: fatigueColor(fatigue),
             subtitle: 'Based on recent peak trend',
           ),
-          statCard(
-            title: 'Force Zone',
-            value: zone,
-            icon: Icons.radar,
-            color: zoneColor(zone),
-            subtitle: 'Current total peak category',
-          ),
         ];
 
         if (constraints.maxWidth < 900) {
           return Column(
-            children: cards
-                .map(
-                  (card) => Padding(
-                    padding: const EdgeInsets.only(bottom: 14),
-                    child: card,
-                  ),
-                )
-                .toList(),
+            children:
+                cards
+                    .map(
+                      (card) => Padding(
+                        padding: const EdgeInsets.only(bottom: 14),
+                        child: card,
+                      ),
+                    )
+                    .toList(),
           );
         }
 
         return Wrap(
           spacing: 14,
           runSpacing: 14,
-          children: cards
-              .map(
-                (card) => SizedBox(
-                  width: (constraints.maxWidth - 28) / 3,
-                  child: card,
-                ),
-              )
-              .toList(),
+          children:
+              cards
+                  .map(
+                    (card) => SizedBox(
+                      width: (constraints.maxWidth - 28) / 3,
+                      child: card,
+                    ),
+                  )
+                  .toList(),
         );
       },
     );
@@ -602,22 +601,25 @@ statCard(
   Widget scoringSection(List<QueryDocumentSnapshot> tests) {
     if (tests.isEmpty) return const SizedBox();
 
-    final peaks = tests.map((doc) {
-      final data = doc.data() as Map<String, dynamic>;
-      return number(data['totalPeakKgf']);
-    }).toList();
+    final peaks =
+        tests.map((doc) {
+          final data = doc.data() as Map<String, dynamic>;
+          return number(data['totalPeakKgf']);
+        }).toList();
 
-    final rfds = tests.map((doc) {
-      final data = doc.data() as Map<String, dynamic>;
-      return number(data['rfdKgfPerSecond']);
-    }).toList();
+    final rfds =
+        tests.map((doc) {
+          final data = doc.data() as Map<String, dynamic>;
+          return number(data['rfdKgfPerSecond']);
+        }).toList();
 
-    final balanceDiffs = tests.map((doc) {
-      final data = doc.data() as Map<String, dynamic>;
-      final front = number(data['balanceFrontPercent']);
-      final back = number(data['balanceBackPercent']);
-      return (front - back).abs();
-    }).toList();
+    final balanceDiffs =
+        tests.map((doc) {
+          final data = doc.data() as Map<String, dynamic>;
+          final front = number(data['balanceFrontPercent']);
+          final back = number(data['balanceBackPercent']);
+          return (front - back).abs();
+        }).toList();
 
     final avgPeak = average(peaks);
     final avgRfd = average(rfds);
@@ -659,14 +661,15 @@ statCard(
 
         if (constraints.maxWidth < 950) {
           return Column(
-            children: cards
-                .map(
-                  (card) => Padding(
-                    padding: const EdgeInsets.only(bottom: 14),
-                    child: card,
-                  ),
-                )
-                .toList(),
+            children:
+                cards
+                    .map(
+                      (card) => Padding(
+                        padding: const EdgeInsets.only(bottom: 14),
+                        child: card,
+                      ),
+                    )
+                    .toList(),
           );
         }
 
@@ -707,9 +710,10 @@ statCard(
         totalSpots.map((spot) => spot.y).reduce((a, b) => a > b ? a : b) + 40;
 
     return chartContainer(
-      title: selectedMode == 'Team'
-          ? 'Team Force Trend'
-          : '${selectedSwimmer?['firstName'] ?? 'Swimmer'} Force Trend',
+      title:
+          selectedMode == 'Team'
+              ? 'Team Force Trend'
+              : '${selectedSwimmer?['firstName'] ?? 'Swimmer'} Force Trend',
       subtitle: 'Peak force progression across saved tests',
       height: 420,
       child: LineChart(
@@ -768,21 +772,21 @@ statCard(
             horizontalLines: [
               HorizontalLine(
                 y: 8,
+                // ignore: deprecated_member_use
                 color: Colors.greenAccent.withOpacity(0.7),
                 strokeWidth: 2,
                 dashArray: [8, 6],
               ),
               HorizontalLine(
                 y: 15,
+                // ignore: deprecated_member_use
                 color: Colors.orangeAccent.withOpacity(0.7),
                 strokeWidth: 2,
                 dashArray: [8, 6],
               ),
             ],
           ),
-          lineBarsData: [
-            chartLine(spots, const Color(0xFF6C4DFF)),
-          ],
+          lineBarsData: [chartLine(spots, const Color(0xFF6C4DFF))],
         ),
       ),
       legend: const [
@@ -802,6 +806,7 @@ statCard(
       dotData: const FlDotData(show: true),
       belowBarData: BarAreaData(
         show: true,
+        // ignore: deprecated_member_use
         color: color.withOpacity(0.10),
       ),
     );
@@ -860,19 +865,16 @@ statCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title,
-              style:
-                  const TextStyle(fontSize: 26, fontWeight: FontWeight.bold)),
+          Text(
+            title,
+            style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+          ),
           const SizedBox(height: 6),
           Text(subtitle, style: const TextStyle(color: Colors.white60)),
           const SizedBox(height: 18),
           Expanded(child: child),
           const SizedBox(height: 12),
-          Wrap(
-            spacing: 18,
-            runSpacing: 8,
-            children: legend,
-          ),
+          Wrap(spacing: 18, runSpacing: 8, children: legend),
         ],
       ),
     );
@@ -887,10 +889,11 @@ statCard(
       );
     }
 
-final selectedA = findTestById(tests, compareAId) ??
-    (tests.length > 1 ? tests[1] : tests.first);
+    final selectedA =
+        findTestById(tests, compareAId) ??
+        (tests.length > 1 ? tests[1] : tests.first);
 
-final selectedB = findTestById(tests, compareBId) ?? tests.first;
+    final selectedB = findTestById(tests, compareBId) ?? tests.first;
 
     final dataA = selectedA.data() as Map<String, dynamic>;
     final dataB = selectedB.data() as Map<String, dynamic>;
@@ -983,21 +986,20 @@ final selectedB = findTestById(tests, compareBId) ?? tests.first;
         labelText: label,
         filled: true,
         fillColor: const Color(0xFF061226),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(18),
-        ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(18)),
       ),
-      items: tests.map((doc) {
-        final data = doc.data() as Map<String, dynamic>;
+      items:
+          tests.map((doc) {
+            final data = doc.data() as Map<String, dynamic>;
 
-        return DropdownMenuItem(
-          value: doc.id,
-          child: Text(
-            '${data['swimmerName'] ?? 'Test'} • ${formatShortDate(data)}',
-            overflow: TextOverflow.ellipsis,
-          ),
-        );
-      }).toList(),
+            return DropdownMenuItem(
+              value: doc.id,
+              child: Text(
+                '${data['swimmerName'] ?? 'Test'} • ${formatShortDate(data)}',
+                overflow: TextOverflow.ellipsis,
+              ),
+            );
+          }).toList(),
       onChanged: onChanged,
     );
   }
@@ -1006,14 +1008,36 @@ final selectedB = findTestById(tests, compareBId) ?? tests.first;
     return LayoutBuilder(
       builder: (context, constraints) {
         final items = [
-          compareMetric('Peak', number(a['totalPeakKgf']), number(b['totalPeakKgf']), 'kgf'),
-          compareMetric('Front', number(a['frontPeakKgf']), number(b['frontPeakKgf']), 'kgf'),
-          compareMetric('Back', number(a['backPeakKgf']), number(b['backPeakKgf']), 'kgf'),
-          compareMetric('RFD', number(a['rfdKgfPerSecond']), number(b['rfdKgfPerSecond']), 'kgf/s'),
+          compareMetric(
+            'Peak',
+            number(a['totalPeakKgf']),
+            number(b['totalPeakKgf']),
+            'kgf',
+          ),
+          compareMetric(
+            'Front',
+            number(a['frontPeakKgf']),
+            number(b['frontPeakKgf']),
+            'kgf',
+          ),
+          compareMetric(
+            'Back',
+            number(a['backPeakKgf']),
+            number(b['backPeakKgf']),
+            'kgf',
+          ),
+          compareMetric(
+            'RFD',
+            number(a['rfdKgfPerSecond']),
+            number(b['rfdKgfPerSecond']),
+            'kgf/s',
+          ),
           compareMetric(
             'Asymmetry',
-            (number(a['balanceFrontPercent']) - number(a['balanceBackPercent'])).abs(),
-            (number(b['balanceFrontPercent']) - number(b['balanceBackPercent'])).abs(),
+            (number(a['balanceFrontPercent']) - number(a['balanceBackPercent']))
+                .abs(),
+            (number(b['balanceFrontPercent']) - number(b['balanceBackPercent']))
+                .abs(),
             '%',
             lowerIsBetter: true,
           ),
@@ -1021,28 +1045,30 @@ final selectedB = findTestById(tests, compareBId) ?? tests.first;
 
         if (constraints.maxWidth < 850) {
           return Column(
-            children: items
-                .map(
-                  (item) => Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: item,
-                  ),
-                )
-                .toList(),
+            children:
+                items
+                    .map(
+                      (item) => Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: item,
+                      ),
+                    )
+                    .toList(),
           );
         }
 
         return Row(
-          children: items
-              .map(
-                (item) => Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.only(right: 10),
-                    child: item,
-                  ),
-                ),
-              )
-              .toList(),
+          children:
+              items
+                  .map(
+                    (item) => Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.only(right: 10),
+                        child: item,
+                      ),
+                    ),
+                  )
+                  .toList(),
         );
       },
     );
@@ -1138,9 +1164,7 @@ final selectedB = findTestById(tests, compareBId) ?? tests.first;
         children: [
           Icon(Icons.circle, color: color, size: 14),
           const SizedBox(width: 10),
-          Expanded(
-            child: Text(label, style: const TextStyle(fontSize: 16)),
-          ),
+          Expanded(child: Text(label, style: const TextStyle(fontSize: 16))),
           Text(
             '$count test${count == 1 ? '' : 's'}',
             style: const TextStyle(fontWeight: FontWeight.bold),
@@ -1159,8 +1183,9 @@ final selectedB = findTestById(tests, compareBId) ?? tests.first;
       final aData = a.data() as Map<String, dynamic>;
       final bData = b.data() as Map<String, dynamic>;
 
-      return number(bData['totalPeakKgf'])
-          .compareTo(number(aData['totalPeakKgf']));
+      return number(
+        bData['totalPeakKgf'],
+      ).compareTo(number(aData['totalPeakKgf']));
     });
 
     final top = sorted.take(8).toList();
@@ -1233,7 +1258,9 @@ final selectedB = findTestById(tests, compareBId) ?? tests.first;
     final fatigue = fatigueStatus(tests);
 
     if (fatigue == 'Fatigue risk') {
-      alerts.add('Fatigue risk detected. Latest peak is significantly below recent average.');
+      alerts.add(
+        'Fatigue risk detected. Latest peak is significantly below recent average.',
+      );
     }
 
     for (final doc in tests.take(8)) {
@@ -1274,8 +1301,10 @@ final selectedB = findTestById(tests, compareBId) ?? tests.first;
               padding: const EdgeInsets.only(bottom: 10),
               child: Row(
                 children: [
-                  const Icon(Icons.warning_amber_rounded,
-                      color: Colors.orangeAccent),
+                  const Icon(
+                    Icons.warning_amber_rounded,
+                    color: Colors.orangeAccent,
+                  ),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
@@ -1379,9 +1408,13 @@ final selectedB = findTestById(tests, compareBId) ?? tests.first;
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title,
-                    style: const TextStyle(
-                        fontSize: 24, fontWeight: FontWeight.bold)),
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
                 const SizedBox(height: 6),
                 Text(body, style: const TextStyle(color: Colors.white60)),
               ],
@@ -1395,9 +1428,7 @@ final selectedB = findTestById(tests, compareBId) ?? tests.first;
   @override
   Widget build(BuildContext context) {
     if (uid == null) {
-      return const Scaffold(
-        body: Center(child: Text('No user logged in')),
-      );
+      return const Scaffold(body: Center(child: Text('No user logged in')));
     }
 
     return Scaffold(
@@ -1405,12 +1436,13 @@ final selectedB = findTestById(tests, compareBId) ?? tests.first;
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(22),
           child: StreamBuilder<QuerySnapshot>(
-            stream: FirebaseFirestore.instance
-                .collection('coaches')
-                .doc(uid)
-                .collection('tests')
-                .orderBy('createdAt', descending: true)
-                .snapshots(),
+            stream:
+                FirebaseFirestore.instance
+                    .collection('coaches')
+                    .doc(uid)
+                    .collection('tests')
+                    .orderBy('createdAt', descending: true)
+                    .snapshots(),
             builder: (context, snapshot) {
               if (snapshot.hasError) {
                 return Text(
@@ -1436,10 +1468,12 @@ final selectedB = findTestById(tests, compareBId) ?? tests.first;
 
                   if (allTests.isEmpty)
                     emptyState()
-                  else if (selectedMode == 'Swimmer' && selectedSwimmerId == null)
+                  else if (selectedMode == 'Swimmer' &&
+                      selectedSwimmerId == null)
                     infoBox(
                       title: 'Select Swimmer',
-                      body: 'Choose an individual swimmer to view personal trends, comparison, readiness, and fatigue data.',
+                      body:
+                          'Choose an individual swimmer to view personal trends, comparison, readiness, and fatigue data.',
                       icon: Icons.person_search,
                     )
                   else if (tests.isEmpty)
@@ -1545,10 +1579,7 @@ class _LegendItem extends StatelessWidget {
   final Color color;
   final String label;
 
-  const _LegendItem({
-    required this.color,
-    required this.label,
-  });
+  const _LegendItem({required this.color, required this.label});
 
   @override
   Widget build(BuildContext context) {

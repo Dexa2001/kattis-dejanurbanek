@@ -30,6 +30,7 @@ dev_dependencies:
     sdk: flutter
 
   flutter_lints: ^5.0.0
+  flutter_launcher_icons: ^0.14.4
 
 flutter:
 
@@ -39,3 +40,9 @@ flutter:
     - assets/images/login_bg_mobile_9x16.png
     - assets/images/login_bg_web_16x9.png
     - assets/images/login_bg_tablet_4x3.png
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/images/swimforce_icon.png"
+  remove_alpha_ios: true

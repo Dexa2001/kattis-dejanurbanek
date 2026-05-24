@@ -5,8 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 
-import 'test_detail_screen.dart';
 import '../services/pdf_report_service.dart';
+import 'test_detail_screen.dart';
 
 class SwimmersScreen extends StatefulWidget {
   const SwimmersScreen({super.key});
@@ -17,7 +17,6 @@ class SwimmersScreen extends StatefulWidget {
 
 class _SwimmersScreenState extends State<SwimmersScreen> {
   String? selectedSwimmerId;
-
   final uid = FirebaseAuth.instance.currentUser?.uid;
 
   double number(dynamic value) {
@@ -52,11 +51,7 @@ class _SwimmersScreenState extends State<SwimmersScreen> {
   String formatTestDate(Map<String, dynamic> test) {
     final raw = test['testStartedAt'];
     final parsed = DateTime.tryParse(raw?.toString() ?? '');
-
-    if (parsed == null) {
-      return 'Unknown date';
-    }
-
+    if (parsed == null) return 'Unknown date';
     return DateFormat('MMM d, yyyy • h:mm a').format(parsed);
   }
 
@@ -66,38 +61,37 @@ class _SwimmersScreenState extends State<SwimmersScreen> {
   }) async {
     final receipt = await showDialog<Map<String, dynamic>>(
       context: context,
-      builder: (_) => AddEditSwimmerDialog(
-        swimmerId: swimmerId,
-        swimmer: swimmer,
-      ),
+      builder:
+          (_) => AddEditSwimmerDialog(swimmerId: swimmerId, swimmer: swimmer),
     );
 
     if (!mounted || receipt == null) return;
 
     showDialog(
       context: context,
-      builder: (_) => AlertDialog(
-        backgroundColor: const Color(0xFF061226),
-        title: Text(
-          receipt['mode'] == 'edit' ? 'Swimmer Updated' : 'Swimmer Created',
-        ),
-        content: Text(
-          'Confirmation Receipt\n\n'
-          'Name: ${receipt['firstName']} ${receipt['lastName']}\n'
-          'DOB: ${receipt['dob']}\n'
-          'Age: ${receipt['age']}\n'
-          'Front Foot: ${receipt['frontFoot']}\n'
-          'Back Foot: ${receipt['backFoot']}\n'
-          'Weight: ${receipt['weightLbs']} lbs\n'
-          'Height: ${receipt['heightDisplay']}',
-        ),
-        actions: [
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Done'),
+      builder:
+          (_) => AlertDialog(
+            backgroundColor: const Color(0xFF061226),
+            title: Text(
+              receipt['mode'] == 'edit' ? 'Swimmer Updated' : 'Swimmer Created',
+            ),
+            content: Text(
+              'Confirmation Receipt\n\n'
+              'Name: ${receipt['firstName']} ${receipt['lastName']}\n'
+              'DOB: ${receipt['dob']}\n'
+              'Age: ${receipt['age']}\n'
+              'Front Foot: ${receipt['frontFoot']}\n'
+              'Back Foot: ${receipt['backFoot']}\n'
+              'Weight: ${receipt['weightLbs']} lbs\n'
+              'Height: ${receipt['heightDisplay']}',
+            ),
+            actions: [
+              ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Done'),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
@@ -106,24 +100,25 @@ class _SwimmersScreenState extends State<SwimmersScreen> {
 
     final shouldDelete = await showDialog<bool>(
       context: context,
-      builder: (_) => AlertDialog(
-        backgroundColor: const Color(0xFF061226),
-        title: const Text('Delete Swimmer'),
-        content: Text(
-          'Are you sure you want to delete $swimmerName?\n\nThis cannot be undone.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+      builder:
+          (_) => AlertDialog(
+            backgroundColor: const Color(0xFF061226),
+            title: const Text('Delete Swimmer'),
+            content: Text(
+              'Are you sure you want to delete $swimmerName?\n\nThis cannot be undone.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('Cancel'),
+              ),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                onPressed: () => Navigator.pop(context, true),
+                child: const Text('Delete'),
+              ),
+            ],
           ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('Delete'),
-          ),
-        ],
-      ),
     );
 
     if (shouldDelete != true) return;
@@ -137,13 +132,11 @@ class _SwimmersScreenState extends State<SwimmersScreen> {
 
     if (!mounted) return;
 
-    setState(() {
-      selectedSwimmerId = null;
-    });
+    setState(() => selectedSwimmerId = null);
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('$swimmerName deleted.')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text('$swimmerName deleted.')));
   }
 
   void openTestDetail({
@@ -154,11 +147,12 @@ class _SwimmersScreenState extends State<SwimmersScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => TestDetailScreen(
-          testData: testData,
-          swimmerData: swimmerData,
-          testId: testId,
-        ),
+        builder:
+            (_) => TestDetailScreen(
+              testData: testData,
+              swimmerData: swimmerData,
+              testId: testId,
+            ),
       ),
     );
   }
@@ -166,27 +160,32 @@ class _SwimmersScreenState extends State<SwimmersScreen> {
   @override
   Widget build(BuildContext context) {
     if (uid == null) {
-      return const Scaffold(
-        body: Center(child: Text('No user logged in')),
-      );
+      return const Scaffold(body: Center(child: Text('No user logged in')));
     }
+
+    final width = MediaQuery.of(context).size.width;
+    final compact = width < 620;
 
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(22),
+          padding: EdgeInsets.symmetric(
+            horizontal: compact ? 16 : 22,
+            vertical: compact ? 18 : 22,
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              pageHeader(),
-              const SizedBox(height: 24),
+              pageHeader(compact),
+              const SizedBox(height: 22),
               StreamBuilder<QuerySnapshot>(
-                stream: FirebaseFirestore.instance
-                    .collection('coaches')
-                    .doc(uid)
-                    .collection('swimmers')
-                    .orderBy('lastNameLower')
-                    .snapshots(),
+                stream:
+                    FirebaseFirestore.instance
+                        .collection('coaches')
+                        .doc(uid)
+                        .collection('swimmers')
+                        .orderBy('lastNameLower')
+                        .snapshots(),
                 builder: (context, snapshot) {
                   if (snapshot.hasError) {
                     return errorBox(snapshot.error.toString());
@@ -199,36 +198,32 @@ class _SwimmersScreenState extends State<SwimmersScreen> {
                   final swimmers = snapshot.data!.docs;
 
                   if (swimmers.isEmpty) {
-                    return emptyState();
+                    return emptyState(compact);
                   }
 
                   QueryDocumentSnapshot? selectedDoc;
 
                   if (selectedSwimmerId != null) {
-                    final matches =
-                        swimmers.where((doc) => doc.id == selectedSwimmerId);
-
-                    if (matches.isNotEmpty) {
-                      selectedDoc = matches.first;
-                    }
+                    final matches = swimmers.where(
+                      (doc) => doc.id == selectedSwimmerId,
+                    );
+                    if (matches.isNotEmpty) selectedDoc = matches.first;
                   }
 
-                  final selectedData = selectedDoc?.data() == null
-                      ? null
-                      : selectedDoc!.data() as Map<String, dynamic>;
+                  final selectedData =
+                      selectedDoc?.data() == null
+                          ? null
+                          : selectedDoc!.data() as Map<String, dynamic>;
 
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       selectSwimmerDropdown(swimmers),
-                      const SizedBox(height: 28),
+                      const SizedBox(height: 24),
                       if (selectedData == null)
-                        selectPrompt()
+                        selectPrompt(compact)
                       else
-                        swimmerProfile(
-                          selectedData,
-                          selectedDoc!.id,
-                        ),
+                        swimmerProfile(selectedData, selectedDoc!.id),
                     ],
                   );
                 },
@@ -240,7 +235,45 @@ class _SwimmersScreenState extends State<SwimmersScreen> {
     );
   }
 
-  Widget pageHeader() {
+  Widget pageHeader(bool compact) {
+    if (compact) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              IconButton(
+                onPressed: () => Navigator.pop(context),
+                icon: const Icon(Icons.arrow_back),
+              ),
+              const SizedBox(width: 6),
+              const Expanded(
+                child: Text(
+                  'Swimmers',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(fontSize: 38, fontWeight: FontWeight.bold),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: () => showSwimmerDialog(),
+              icon: const Icon(Icons.person_add),
+              label: const Text('Register Swimmer'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF1976FF),
+                padding: const EdgeInsets.symmetric(vertical: 17),
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+
     return Row(
       children: [
         IconButton(
@@ -251,10 +284,7 @@ class _SwimmersScreenState extends State<SwimmersScreen> {
         const Expanded(
           child: Text(
             'Swimmers',
-            style: TextStyle(
-              fontSize: 38,
-              fontWeight: FontWeight.bold,
-            ),
+            style: TextStyle(fontSize: 38, fontWeight: FontWeight.bold),
           ),
         ),
         ElevatedButton.icon(
@@ -263,10 +293,7 @@ class _SwimmersScreenState extends State<SwimmersScreen> {
           label: const Text('Register Swimmer'),
           style: ElevatedButton.styleFrom(
             backgroundColor: const Color(0xFF1976FF),
-            padding: const EdgeInsets.symmetric(
-              horizontal: 20,
-              vertical: 16,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
           ),
         ),
       ],
@@ -292,22 +319,16 @@ class _SwimmersScreenState extends State<SwimmersScreen> {
             ),
             ...swimmers.map((doc) {
               final data = doc.data() as Map<String, dynamic>;
-
               return DropdownMenuItem<String>(
                 value: doc.id,
-                child: Text(
-                  '${data['firstName']} ${data['lastName']}',
-                ),
+                child: Text('${data['firstName']} ${data['lastName']}'),
               );
             }),
           ],
           onChanged: (value) {
             setState(() {
-              if (value == null || value == 'none') {
-                selectedSwimmerId = null;
-              } else {
-                selectedSwimmerId = value;
-              }
+              selectedSwimmerId =
+                  value == null || value == 'none' ? null : value;
             });
           },
         ),
@@ -330,10 +351,10 @@ class _SwimmersScreenState extends State<SwimmersScreen> {
     );
   }
 
-  Widget emptyState() {
+  Widget emptyState(bool compact) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(30),
+      padding: EdgeInsets.all(compact ? 24 : 30),
       decoration: BoxDecoration(
         color: const Color(0xFF111C2E),
         borderRadius: BorderRadius.circular(24),
@@ -344,34 +365,39 @@ class _SwimmersScreenState extends State<SwimmersScreen> {
           const SizedBox(height: 18),
           const Text(
             'No swimmers added yet',
+            textAlign: TextAlign.center,
             style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
           const Text(
             'Register your first swimmer to begin tracking force data.',
+            textAlign: TextAlign.center,
             style: TextStyle(color: Colors.white70),
           ),
           const SizedBox(height: 22),
-          ElevatedButton.icon(
-            onPressed: () => showSwimmerDialog(),
-            icon: const Icon(Icons.person_add),
-            label: const Text('Register Swimmer'),
+          SizedBox(
+            width: compact ? double.infinity : null,
+            child: ElevatedButton.icon(
+              onPressed: () => showSwimmerDialog(),
+              icon: const Icon(Icons.person_add),
+              label: const Text('Register Swimmer'),
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget selectPrompt() {
+  Widget selectPrompt(bool compact) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(26),
+      padding: EdgeInsets.all(compact ? 22 : 26),
       decoration: BoxDecoration(
         color: const Color(0xFF111C2E),
         borderRadius: BorderRadius.circular(22),
       ),
-      child: const Row(
-        children: [
+      child: Row(
+        children: const [
           Icon(Icons.arrow_drop_down_circle, color: Colors.white70, size: 38),
           SizedBox(width: 16),
           Expanded(
@@ -387,9 +413,6 @@ class _SwimmersScreenState extends State<SwimmersScreen> {
 
   Widget swimmerProfile(Map<String, dynamic> swimmer, String swimmerId) {
     final age = calculateAge(swimmer['dob'] ?? '');
-
-    final heightDisplay = swimmer['heightDisplay'] ?? '-';
-    final weightLbs = swimmer['weightLbs'] ?? '-';
     final firstName = swimmer['firstName'] ?? '';
     final lastName = swimmer['lastName'] ?? '';
     final fullName = '$firstName $lastName';
@@ -399,20 +422,25 @@ class _SwimmersScreenState extends State<SwimmersScreen> {
       children: [
         Container(
           width: double.infinity,
-          padding: const EdgeInsets.all(26),
+          padding: const EdgeInsets.all(22),
           decoration: BoxDecoration(
             color: const Color(0xFF111C2E),
             borderRadius: BorderRadius.circular(24),
           ),
           child: LayoutBuilder(
             builder: (context, constraints) {
-              if (constraints.maxWidth < 750) {
+              if (constraints.maxWidth < 760) {
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    profileMainInfo(swimmer, age),
+                    profileMainInfo(swimmer, age, compact: true),
                     const SizedBox(height: 18),
-                    profileActionButtons(swimmerId, swimmer, fullName),
+                    profileActionButtons(
+                      swimmerId,
+                      swimmer,
+                      fullName,
+                      compact: true,
+                    ),
                   ],
                 );
               }
@@ -426,12 +454,12 @@ class _SwimmersScreenState extends State<SwimmersScreen> {
             },
           ),
         ),
-        const SizedBox(height: 24),
+        const SizedBox(height: 22),
         swimmerAnalytics(swimmerId),
-        const SizedBox(height: 24),
+        const SizedBox(height: 22),
         LayoutBuilder(
           builder: (context, constraints) {
-            if (constraints.maxWidth < 850) {
+            if (constraints.maxWidth < 900) {
               return Column(
                 children: [
                   recentTestsBox(swimmerId, swimmer),
@@ -455,9 +483,57 @@ class _SwimmersScreenState extends State<SwimmersScreen> {
     );
   }
 
-  Widget profileMainInfo(Map<String, dynamic> swimmer, int age) {
+  Widget profileMainInfo(
+    Map<String, dynamic> swimmer,
+    int age, {
+    bool compact = false,
+  }) {
     final heightDisplay = swimmer['heightDisplay'] ?? '-';
     final weightLbs = swimmer['weightLbs'] ?? '-';
+
+    if (compact) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const CircleAvatar(
+                radius: 34,
+                backgroundColor: Color(0xFF1976FF),
+                child: Icon(Icons.person, size: 38, color: Colors.white),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Text(
+                  '${swimmer['firstName']} ${swimmer['lastName']}',
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 27,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Wrap(
+            spacing: 10,
+            runSpacing: 10,
+            children: [
+              infoChip(heightDisplay.toString()),
+              infoChip('$weightLbs lbs'),
+              infoChip('Age: $age'),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'Front foot: ${swimmer['frontFoot']} | Back foot: ${swimmer['backFoot']}',
+            style: const TextStyle(color: Colors.white60),
+          ),
+        ],
+      );
+    }
 
     return Row(
       children: [
@@ -482,24 +558,7 @@ class _SwimmersScreenState extends State<SwimmersScreen> {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 7,
-                    ),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF061226),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      heightDisplay.toString(),
-                      style: const TextStyle(
-                        fontSize: 15,
-                        color: Colors.white70,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
+                  infoChip(heightDisplay.toString()),
                 ],
               ),
               const SizedBox(height: 8),
@@ -524,20 +583,61 @@ class _SwimmersScreenState extends State<SwimmersScreen> {
     );
   }
 
+  Widget infoChip(String text) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+      decoration: BoxDecoration(
+        color: const Color(0xFF061226),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        text,
+        style: const TextStyle(
+          fontSize: 15,
+          color: Colors.white70,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
+  }
+
   Widget profileActionButtons(
     String swimmerId,
     Map<String, dynamic> swimmer,
-    String fullName,
-  ) {
+    String fullName, {
+    bool compact = false,
+  }) {
+    if (compact) {
+      return Row(
+        children: [
+          Expanded(
+            child: OutlinedButton.icon(
+              onPressed: () {
+                showSwimmerDialog(swimmerId: swimmerId, swimmer: swimmer);
+              },
+              icon: const Icon(Icons.edit),
+              label: const Text('Edit'),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+              onPressed: () => deleteSwimmer(swimmerId, fullName),
+              icon: const Icon(Icons.delete),
+              label: const Text('Delete'),
+            ),
+          ),
+        ],
+      );
+    }
+
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         OutlinedButton.icon(
           onPressed: () {
-            showSwimmerDialog(
-              swimmerId: swimmerId,
-              swimmer: swimmer,
-            );
+            showSwimmerDialog(swimmerId: swimmerId, swimmer: swimmer);
           },
           icon: const Icon(Icons.edit),
           label: const Text('Edit'),
@@ -557,25 +657,21 @@ class _SwimmersScreenState extends State<SwimmersScreen> {
     if (uid == null) return const SizedBox();
 
     return StreamBuilder<QuerySnapshot>(
-      stream: FirebaseFirestore.instance
-          .collection('coaches')
-          .doc(uid)
-          .collection('swimmers')
-          .doc(swimmerId)
-          .collection('tests')
-          .orderBy('createdAt', descending: true)
-          .limit(20)
-          .snapshots(),
+      stream:
+          FirebaseFirestore.instance
+              .collection('coaches')
+              .doc(uid)
+              .collection('swimmers')
+              .doc(swimmerId)
+              .collection('tests')
+              .orderBy('createdAt', descending: true)
+              .limit(20)
+              .snapshots(),
       builder: (context, snapshot) {
-        if (!snapshot.hasData) {
-          return const LinearProgressIndicator();
-        }
+        if (!snapshot.hasData) return const LinearProgressIndicator();
 
         final tests = snapshot.data!.docs;
-
-        if (tests.isEmpty) {
-          return const SizedBox();
-        }
+        if (tests.isEmpty) return const SizedBox();
 
         final latest = tests.first.data() as Map<String, dynamic>;
 
@@ -583,8 +679,8 @@ class _SwimmersScreenState extends State<SwimmersScreen> {
         final rfd = number(latest['rfdKgfPerSecond']);
         final frontBalance = number(latest['balanceFrontPercent']);
         final backBalance = number(latest['balanceBackPercent']);
-        final diff = (frontBalance - backBalance).abs();
 
+        final diff = (frontBalance - backBalance).abs();
         final symmetryScore = (100 - diff).clamp(0, 100).toDouble();
         final readinessScore =
             ((symmetryScore * 0.45) + (rfd.clamp(0, 50) * 1.1)).clamp(0, 100);
@@ -594,14 +690,26 @@ class _SwimmersScreenState extends State<SwimmersScreen> {
             if (constraints.maxWidth < 850) {
               return Column(
                 children: [
-                  analyticsCard('Latest Peak', '${totalPeak.toStringAsFixed(1)} kgf',
-                      Icons.bolt, const Color(0xFFFF8C1A)),
+                  analyticsCard(
+                    'Latest Peak',
+                    '${totalPeak.toStringAsFixed(1)} kgf',
+                    Icons.bolt,
+                    const Color(0xFFFF8C1A),
+                  ),
                   const SizedBox(height: 14),
-                  analyticsCard('Symmetry Score', '${symmetryScore.toStringAsFixed(0)} / 100',
-                      Icons.balance, const Color(0xFF00B8A9)),
+                  analyticsCard(
+                    'Symmetry Score',
+                    '${symmetryScore.toStringAsFixed(0)} / 100',
+                    Icons.balance,
+                    const Color(0xFF00B8A9),
+                  ),
                   const SizedBox(height: 14),
-                  analyticsCard('Readiness', '${readinessScore.toStringAsFixed(0)} / 100',
-                      Icons.speed, const Color(0xFF1976FF)),
+                  analyticsCard(
+                    'Readiness',
+                    '${readinessScore.toStringAsFixed(0)} / 100',
+                    Icons.speed,
+                    const Color(0xFF1976FF),
+                  ),
                 ],
               );
             }
@@ -609,18 +717,30 @@ class _SwimmersScreenState extends State<SwimmersScreen> {
             return Row(
               children: [
                 Expanded(
-                  child: analyticsCard('Latest Peak', '${totalPeak.toStringAsFixed(1)} kgf',
-                      Icons.bolt, const Color(0xFFFF8C1A)),
+                  child: analyticsCard(
+                    'Latest Peak',
+                    '${totalPeak.toStringAsFixed(1)} kgf',
+                    Icons.bolt,
+                    const Color(0xFFFF8C1A),
+                  ),
                 ),
                 const SizedBox(width: 14),
                 Expanded(
-                  child: analyticsCard('Symmetry Score', '${symmetryScore.toStringAsFixed(0)} / 100',
-                      Icons.balance, const Color(0xFF00B8A9)),
+                  child: analyticsCard(
+                    'Symmetry Score',
+                    '${symmetryScore.toStringAsFixed(0)} / 100',
+                    Icons.balance,
+                    const Color(0xFF00B8A9),
+                  ),
                 ),
                 const SizedBox(width: 14),
                 Expanded(
-                  child: analyticsCard('Readiness', '${readinessScore.toStringAsFixed(0)} / 100',
-                      Icons.speed, const Color(0xFF1976FF)),
+                  child: analyticsCard(
+                    'Readiness',
+                    '${readinessScore.toStringAsFixed(0)} / 100',
+                    Icons.speed,
+                    const Color(0xFF1976FF),
+                  ),
                 ),
               ],
             );
@@ -632,6 +752,7 @@ class _SwimmersScreenState extends State<SwimmersScreen> {
 
   Widget analyticsCard(String title, String value, IconData icon, Color color) {
     return Container(
+      width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: const Color(0xFF111C2E),
@@ -641,16 +762,21 @@ class _SwimmersScreenState extends State<SwimmersScreen> {
         children: [
           Icon(icon, color: color, size: 34),
           const SizedBox(width: 14),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(title, style: const TextStyle(color: Colors.white70)),
-              const SizedBox(height: 6),
-              Text(
-                value,
-                style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
-              ),
-            ],
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: const TextStyle(color: Colors.white70)),
+                const SizedBox(height: 6),
+                Text(
+                  value,
+                  style: const TextStyle(
+                    fontSize: 26,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -668,15 +794,16 @@ class _SwimmersScreenState extends State<SwimmersScreen> {
         borderRadius: BorderRadius.circular(22),
       ),
       child: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance
-            .collection('coaches')
-            .doc(uid)
-            .collection('swimmers')
-            .doc(swimmerId)
-            .collection('tests')
-            .orderBy('createdAt', descending: true)
-            .limit(8)
-            .snapshots(),
+        stream:
+            FirebaseFirestore.instance
+                .collection('coaches')
+                .doc(uid)
+                .collection('swimmers')
+                .doc(swimmerId)
+                .collection('tests')
+                .orderBy('createdAt', descending: true)
+                .limit(8)
+                .snapshots(),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             return Text(
@@ -769,7 +896,10 @@ class _SwimmersScreenState extends State<SwimmersScreen> {
             testId: testId,
           );
         },
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 10,
+        ),
         leading: const CircleAvatar(
           backgroundColor: Color(0xFF1976FF),
           child: Icon(Icons.analytics, color: Colors.white),
@@ -814,15 +944,16 @@ class _SwimmersScreenState extends State<SwimmersScreen> {
         borderRadius: BorderRadius.circular(22),
       ),
       child: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance
-            .collection('coaches')
-            .doc(uid)
-            .collection('swimmers')
-            .doc(swimmerId)
-            .collection('tests')
-            .orderBy('createdAt')
-            .limit(20)
-            .snapshots(),
+        stream:
+            FirebaseFirestore.instance
+                .collection('coaches')
+                .doc(uid)
+                .collection('swimmers')
+                .doc(swimmerId)
+                .collection('tests')
+                .orderBy('createdAt')
+                .limit(20)
+                .snapshots(),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             return Text(
@@ -867,7 +998,8 @@ class _SwimmersScreenState extends State<SwimmersScreen> {
             totalSpots.add(FlSpot(x, number(data['totalPeakKgf'])));
           }
 
-          final maxY = totalSpots
+          final maxY =
+              totalSpots
                   .map((spot) => spot.y)
                   .fold<double>(0, (a, b) => b > a ? b : a) +
               30;
@@ -928,19 +1060,34 @@ class _SwimmersScreenState extends State<SwimmersScreen> {
                 ),
               ),
               const SizedBox(height: 12),
-              const Row(
+              const Wrap(
+                spacing: 16,
+                runSpacing: 8,
                 children: [
-                  Icon(Icons.circle, color: Color(0xFF1976FF), size: 12),
-                  SizedBox(width: 6),
-                  Text('Front'),
-                  SizedBox(width: 16),
-                  Icon(Icons.circle, color: Color(0xFF00B8A9), size: 12),
-                  SizedBox(width: 6),
-                  Text('Back'),
-                  SizedBox(width: 16),
-                  Icon(Icons.circle, color: Colors.orange, size: 12),
-                  SizedBox(width: 6),
-                  Text('Total'),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.circle, color: Color(0xFF1976FF), size: 12),
+                      SizedBox(width: 6),
+                      Text('Front'),
+                    ],
+                  ),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.circle, color: Color(0xFF00B8A9), size: 12),
+                      SizedBox(width: 6),
+                      Text('Back'),
+                    ],
+                  ),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.circle, color: Colors.orange, size: 12),
+                      SizedBox(width: 6),
+                      Text('Total'),
+                    ],
+                  ),
                 ],
               ),
             ],
@@ -955,11 +1102,7 @@ class AddEditSwimmerDialog extends StatefulWidget {
   final String? swimmerId;
   final Map<String, dynamic>? swimmer;
 
-  const AddEditSwimmerDialog({
-    super.key,
-    this.swimmerId,
-    this.swimmer,
-  });
+  const AddEditSwimmerDialog({super.key, this.swimmerId, this.swimmer});
 
   @override
   State<AddEditSwimmerDialog> createState() => _AddEditSwimmerDialogState();
@@ -1003,15 +1146,12 @@ class _AddEditSwimmerDialogState extends State<AddEditSwimmerDialog> {
 
   String capitalizeName(String value) {
     final trimmed = value.trim();
-
     if (trimmed.isEmpty) return '';
 
     return trimmed
         .split(' ')
         .where((part) => part.isNotEmpty)
-        .map((part) {
-          return part[0].toUpperCase() + part.substring(1).toLowerCase();
-        })
+        .map((part) => part[0].toUpperCase() + part.substring(1).toLowerCase())
         .join(' ');
   }
 
@@ -1059,12 +1199,13 @@ class _AddEditSwimmerDialogState extends State<AddEditSwimmerDialog> {
   }) async {
     final normalizedName = '${first.toLowerCase()} ${last.toLowerCase()}';
 
-    final snapshot = await FirebaseFirestore.instance
-        .collection('coaches')
-        .doc(uid)
-        .collection('swimmers')
-        .where('normalizedName', isEqualTo: normalizedName)
-        .get();
+    final snapshot =
+        await FirebaseFirestore.instance
+            .collection('coaches')
+            .doc(uid)
+            .collection('swimmers')
+            .where('normalizedName', isEqualTo: normalizedName)
+            .get();
 
     if (snapshot.docs.isEmpty) return false;
 
@@ -1079,7 +1220,6 @@ class _AddEditSwimmerDialogState extends State<AddEditSwimmerDialog> {
 
   Future<void> saveSwimmer() async {
     final uid = FirebaseAuth.instance.currentUser?.uid;
-
     if (uid == null) return;
 
     final cleanFirstName = capitalizeName(firstName.text);
@@ -1173,18 +1313,15 @@ class _AddEditSwimmerDialogState extends State<AddEditSwimmerDialog> {
     } catch (e) {
       showMessage('Could not save swimmer: $e');
     } finally {
-      if (mounted) {
-        setState(() => isSaving = false);
-      }
+      if (mounted) setState(() => isSaving = false);
     }
   }
 
   void showMessage(String message) {
     if (!mounted) return;
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 
   @override
@@ -1216,9 +1353,7 @@ class _AddEditSwimmerDialogState extends State<AddEditSwimmerDialog> {
         labelText: label,
         filled: true,
         fillColor: const Color(0xFF111C2E),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
       ),
     );
   }
@@ -1237,18 +1372,17 @@ class _AddEditSwimmerDialogState extends State<AddEditSwimmerDialog> {
         labelText: label,
         filled: true,
         fillColor: const Color(0xFF111C2E),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
       ),
-      items: values
-          .map(
-            (item) => DropdownMenuItem<int>(
-              value: item,
-              child: Text('$item $suffix'),
-            ),
-          )
-          .toList(),
+      items:
+          values
+              .map(
+                (item) => DropdownMenuItem<int>(
+                  value: item,
+                  child: Text('$item $suffix'),
+                ),
+              )
+              .toList(),
       onChanged: onChanged,
     );
   }
@@ -1267,40 +1401,53 @@ class _AddEditSwimmerDialogState extends State<AddEditSwimmerDialog> {
     );
   }
 
+  Widget responsiveRow(List<Widget> children) {
+    final width = MediaQuery.of(context).size.width;
+
+    if (width < 620) {
+      return Column(
+        children:
+            children
+                .map(
+                  (child) => Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: child,
+                  ),
+                )
+                .toList(),
+      );
+    }
+
+    return Row(
+      children: [
+        for (int i = 0; i < children.length; i++) ...[
+          Expanded(child: children[i]),
+          if (i != children.length - 1) const SizedBox(width: 12),
+        ],
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+    final dialogWidth = width < 700 ? width * 0.9 : 620.0;
+
     return AlertDialog(
       backgroundColor: const Color(0xFF061226),
       title: Text(isEdit ? 'Edit Swimmer' : 'Register Swimmer'),
       content: SingleChildScrollView(
         child: SizedBox(
-          width: 620,
+          width: dialogWidth,
           child: Column(
             children: [
               sectionTitle('Basic Information'),
               const SizedBox(height: 10),
-              Row(
-                children: [
-                  Expanded(
-                    child: field(
-                      firstName,
-                      'First Name',
-                      icon: Icons.person_outline,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: field(
-                      lastName,
-                      'Last Name',
-                      icon: Icons.person_outline,
-                    ),
-                  ),
-                ],
-              ),
-
+              responsiveRow([
+                field(firstName, 'First Name', icon: Icons.person_outline),
+                field(lastName, 'Last Name', icon: Icons.person_outline),
+              ]),
               const SizedBox(height: 14),
-
               TextField(
                 controller: dob,
                 keyboardType: TextInputType.datetime,
@@ -1318,112 +1465,89 @@ class _AddEditSwimmerDialogState extends State<AddEditSwimmerDialog> {
                   ),
                 ),
               ),
-
               const SizedBox(height: 18),
               sectionTitle('Body Measurements'),
               const SizedBox(height: 10),
-
-              Row(
-                children: [
-                  Expanded(
-                    child: field(
-                      weight,
-                      'Weight lbs',
-                      numbersOnly: true,
-                      maxLength: 3,
-                      icon: Icons.monitor_weight_outlined,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: dropdownBox(
-                      label: 'Height Feet',
-                      value: heightFeet,
-                      values: List.generate(5, (index) => index + 4),
-                      suffix: 'ft',
-                      onChanged: (value) {
-                        if (value == null) return;
-                        setState(() => heightFeet = value);
-                      },
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: dropdownBox(
-                      label: 'Height Inches',
-                      value: heightInches,
-                      values: List.generate(12, (index) => index),
-                      suffix: 'in',
-                      onChanged: (value) {
-                        if (value == null) return;
-                        setState(() => heightInches = value);
-                      },
-                    ),
-                  ),
-                ],
-              ),
-
+              responsiveRow([
+                field(
+                  weight,
+                  'Weight lbs',
+                  numbersOnly: true,
+                  maxLength: 3,
+                  icon: Icons.monitor_weight_outlined,
+                ),
+                dropdownBox(
+                  label: 'Height Feet',
+                  value: heightFeet,
+                  values: List.generate(5, (index) => index + 4),
+                  suffix: 'ft',
+                  onChanged: (value) {
+                    if (value == null) return;
+                    setState(() => heightFeet = value);
+                  },
+                ),
+                dropdownBox(
+                  label: 'Height Inches',
+                  value: heightInches,
+                  values: List.generate(12, (index) => index),
+                  suffix: 'in',
+                  onChanged: (value) {
+                    if (value == null) return;
+                    setState(() => heightInches = value);
+                  },
+                ),
+              ]),
               const SizedBox(height: 18),
               sectionTitle('Start Position'),
               const SizedBox(height: 10),
-
-              Row(
-                children: [
-                  Expanded(
-                    child: DropdownButtonFormField<String>(
-                      value: frontFoot,
-                      dropdownColor: const Color(0xFF111C2E),
-                      decoration: InputDecoration(
-                        labelText: 'Front Foot',
-                        filled: true,
-                        fillColor: const Color(0xFF111C2E),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                      ),
-                      items: const [
-                        DropdownMenuItem(value: 'Left', child: Text('Left')),
-                        DropdownMenuItem(value: 'Right', child: Text('Right')),
-                      ],
-                      onChanged: (value) {
-                        if (value == null) return;
-
-                        setState(() {
-                          frontFoot = value;
-                          backFoot = value == 'Left' ? 'Right' : 'Left';
-                        });
-                      },
+              responsiveRow([
+                DropdownButtonFormField<String>(
+                  value: frontFoot,
+                  dropdownColor: const Color(0xFF111C2E),
+                  decoration: InputDecoration(
+                    labelText: 'Front Foot',
+                    filled: true,
+                    fillColor: const Color(0xFF111C2E),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
                     ),
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: DropdownButtonFormField<String>(
-                      value: backFoot,
-                      dropdownColor: const Color(0xFF111C2E),
-                      decoration: InputDecoration(
-                        labelText: 'Back Foot',
-                        filled: true,
-                        fillColor: const Color(0xFF111C2E),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                      ),
-                      items: const [
-                        DropdownMenuItem(value: 'Left', child: Text('Left')),
-                        DropdownMenuItem(value: 'Right', child: Text('Right')),
-                      ],
-                      onChanged: (value) {
-                        if (value == null) return;
-
-                        setState(() {
-                          backFoot = value;
-                          frontFoot = value == 'Left' ? 'Right' : 'Left';
-                        });
-                      },
+                  items: const [
+                    DropdownMenuItem(value: 'Left', child: Text('Left')),
+                    DropdownMenuItem(value: 'Right', child: Text('Right')),
+                  ],
+                  onChanged: (value) {
+                    if (value == null) return;
+                    setState(() {
+                      frontFoot = value;
+                      backFoot = value == 'Left' ? 'Right' : 'Left';
+                    });
+                  },
+                ),
+                DropdownButtonFormField<String>(
+                  value: backFoot,
+                  dropdownColor: const Color(0xFF111C2E),
+                  decoration: InputDecoration(
+                    labelText: 'Back Foot',
+                    filled: true,
+                    fillColor: const Color(0xFF111C2E),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
                     ),
                   ),
-                ],
-              ),
+                  items: const [
+                    DropdownMenuItem(value: 'Left', child: Text('Left')),
+                    DropdownMenuItem(value: 'Right', child: Text('Right')),
+                  ],
+                  onChanged: (value) {
+                    if (value == null) return;
+                    setState(() {
+                      backFoot = value;
+                      frontFoot = value == 'Left' ? 'Right' : 'Left';
+                    });
+                  },
+                ),
+              ]),
             ],
           ),
         ),
@@ -1436,16 +1560,17 @@ class _AddEditSwimmerDialogState extends State<AddEditSwimmerDialog> {
         ElevatedButton.icon(
           onPressed: isSaving ? null : saveSwimmer,
           icon: Icon(isEdit ? Icons.save : Icons.person_add),
-          label: isSaving
-              ? const SizedBox(
-                  width: 18,
-                  height: 18,
-                  child: CircularProgressIndicator(
-                    color: Colors.white,
-                    strokeWidth: 2,
-                  ),
-                )
-              : Text(isEdit ? 'Save Changes' : 'Save Swimmer'),
+          label:
+              isSaving
+                  ? const SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(
+                      color: Colors.white,
+                      strokeWidth: 2,
+                    ),
+                  )
+                  : Text(isEdit ? 'Save Changes' : 'Save Swimmer'),
         ),
       ],
     );

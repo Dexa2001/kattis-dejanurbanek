@@ -72,7 +72,9 @@ class _LoginScreenState extends State<LoginScreen>
   }
 
   void showMessage(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 
   void showRegisterDialog() {
@@ -93,6 +95,9 @@ class _LoginScreenState extends State<LoginScreen>
 
   @override
   Widget build(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+    final compact = width < 600;
+
     return Scaffold(
       body: Stack(
         children: [
@@ -100,34 +105,46 @@ class _LoginScreenState extends State<LoginScreen>
             child: Image.asset(
               backgroundImage(context),
               fit: BoxFit.cover,
-              alignment: Alignment.center,
+              alignment: compact ? Alignment.centerRight : Alignment.center,
             ),
           ),
-
           Positioned.fill(
             child: Container(
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.centerLeft,
-                  end: Alignment.centerRight,
-                  colors: [
-                    const Color(0xFF061226).withValues(alpha: 0.95),
-                    const Color(0xFF061226).withValues(alpha: 0.78),
-                    const Color(0xFF061226).withValues(alpha: 0.35),
-                  ],
-                ),
+                gradient:
+                    compact
+                        ? LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            const Color(0xFF061226).withValues(alpha: 0.78),
+                            const Color(0xFF061226).withValues(alpha: 0.82),
+                            const Color(0xFF061226).withValues(alpha: 0.94),
+                          ],
+                        )
+                        : LinearGradient(
+                          begin: Alignment.centerLeft,
+                          end: Alignment.centerRight,
+                          colors: [
+                            const Color(0xFF061226).withValues(alpha: 0.95),
+                            const Color(0xFF061226).withValues(alpha: 0.78),
+                            const Color(0xFF061226).withValues(alpha: 0.35),
+                          ],
+                        ),
               ),
             ),
           ),
-
           SafeArea(
             child: Center(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.all(28),
+                padding: EdgeInsets.symmetric(
+                  horizontal: compact ? 20 : 28,
+                  vertical: compact ? 18 : 28,
+                ),
                 child: Align(
-                  alignment: Alignment.centerLeft,
+                  alignment: compact ? Alignment.center : Alignment.centerLeft,
                   child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 480),
+                    constraints: BoxConstraints(maxWidth: compact ? 430 : 480),
                     child: AnimatedBuilder(
                       animation: animationController,
                       builder: (context, child) {
@@ -140,9 +157,12 @@ class _LoginScreenState extends State<LoginScreen>
                         );
                       },
                       child: Container(
-                        padding: const EdgeInsets.all(28),
+                        width: double.infinity,
+                        padding: EdgeInsets.all(compact ? 24 : 28),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF061226).withValues(alpha: 0.78),
+                          color: const Color(
+                            0xFF061226,
+                          ).withValues(alpha: 0.80),
                           borderRadius: BorderRadius.circular(28),
                           border: Border.all(color: Colors.white12),
                           boxShadow: [
@@ -156,17 +176,22 @@ class _LoginScreenState extends State<LoginScreen>
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              'SWIMFORCE +',
-                              style: TextStyle(
-                                fontSize: 46,
-                                fontWeight: FontWeight.bold,
-                                letterSpacing: 1.2,
+                            FittedBox(
+                              fit: BoxFit.scaleDown,
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                'SWIMFORCE+',
+                                maxLines: 1,
+                                style: TextStyle(
+                                  fontSize: compact ? 42 : 48,
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 0.8,
+                                ),
                               ),
                             ),
-                            const SizedBox(height: 8),
+                            const SizedBox(height: 10),
                             const Text(
-                              'Measure. Track. Improve.',
+                              'Measure. Analyze. Improve.',
                               style: TextStyle(
                                 fontSize: 18,
                                 color: Colors.white70,
@@ -180,25 +205,20 @@ class _LoginScreenState extends State<LoginScreen>
                                 color: Colors.white60,
                               ),
                             ),
-                            const SizedBox(height: 36),
-
+                            SizedBox(height: compact ? 30 : 36),
                             inputField(
                               controller: emailController,
                               label: 'Email',
                               icon: Icons.email_outlined,
                             ),
-
                             const SizedBox(height: 18),
-
                             inputField(
                               controller: passwordController,
                               label: 'Password',
                               icon: Icons.lock_outline,
                               obscure: true,
                             ),
-
                             const SizedBox(height: 24),
-
                             SizedBox(
                               width: double.infinity,
                               height: 62,
@@ -210,30 +230,28 @@ class _LoginScreenState extends State<LoginScreen>
                                     borderRadius: BorderRadius.circular(20),
                                   ),
                                 ),
-                                child: isLoading
-                                    ? const CircularProgressIndicator(
-                                        color: Colors.white,
-                                      )
-                                    : const Text(
-                                        'LOG IN',
-                                        style: TextStyle(
-                                          fontSize: 19,
-                                          fontWeight: FontWeight.bold,
+                                child:
+                                    isLoading
+                                        ? const CircularProgressIndicator(
                                           color: Colors.white,
+                                        )
+                                        : const Text(
+                                          'LOG IN',
+                                          style: TextStyle(
+                                            fontSize: 19,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.white,
+                                          ),
                                         ),
-                                      ),
                               ),
                             ),
-
                             const SizedBox(height: 18),
-
                             TextButton(
                               onPressed: showRegisterDialog,
                               child: const Text(
                                 'Need an account? Register as coach',
                               ),
                             ),
-
                             TextButton(
                               onPressed: showResetPasswordDialog,
                               child: const Text(
@@ -309,11 +327,11 @@ class _CoachRegisterDialogState extends State<CoachRegisterDialog> {
     setState(() => isLoading = true);
 
     try {
-      final userCredential =
-          await FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: email.text.trim(),
-        password: password.text.trim(),
-      );
+      final userCredential = await FirebaseAuth.instance
+          .createUserWithEmailAndPassword(
+            email: email.text.trim(),
+            password: password.text.trim(),
+          );
 
       final uid = userCredential.user!.uid;
 
@@ -336,7 +354,9 @@ class _CoachRegisterDialogState extends State<CoachRegisterDialog> {
   }
 
   void showMessage(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 
   @override
@@ -350,23 +370,67 @@ class _CoachRegisterDialogState extends State<CoachRegisterDialog> {
     super.dispose();
   }
 
+  Widget field(
+    TextEditingController controller,
+    String label, {
+    bool obscure = false,
+  }) {
+    return TextField(
+      controller: controller,
+      obscureText: obscure,
+      decoration: InputDecoration(
+        labelText: label,
+        filled: true,
+        fillColor: const Color(0xFF111C2E),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+      ),
+    );
+  }
+
+  Widget responsiveRow(List<Widget> children) {
+    final width = MediaQuery.of(context).size.width;
+
+    if (width < 620) {
+      return Column(
+        children:
+            children
+                .map(
+                  (child) => Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: child,
+                  ),
+                )
+                .toList(),
+      );
+    }
+
+    return Row(
+      children: [
+        for (int i = 0; i < children.length; i++) ...[
+          Expanded(child: children[i]),
+          if (i != children.length - 1) const SizedBox(width: 12),
+        ],
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+    final dialogWidth = width < 700 ? width * 0.9 : 460.0;
+
     return AlertDialog(
       backgroundColor: const Color(0xFF061226),
       title: const Text('Register as Coach'),
       content: SingleChildScrollView(
         child: SizedBox(
-          width: 460,
+          width: dialogWidth,
           child: Column(
             children: [
-              Row(
-                children: [
-                  Expanded(child: field(firstName, 'First Name')),
-                  const SizedBox(width: 12),
-                  Expanded(child: field(lastName, 'Last Name')),
-                ],
-              ),
+              responsiveRow([
+                field(firstName, 'First Name'),
+                field(lastName, 'Last Name'),
+              ]),
               const SizedBox(height: 14),
               TextField(
                 controller: dob,
@@ -395,33 +459,17 @@ class _CoachRegisterDialogState extends State<CoachRegisterDialog> {
       ),
       actions: [
         TextButton(
-          onPressed: () => Navigator.pop(context),
+          onPressed: isLoading ? null : () => Navigator.pop(context),
           child: const Text('Cancel'),
         ),
         ElevatedButton(
           onPressed: isLoading ? null : registerCoach,
-          child: isLoading
-              ? const CircularProgressIndicator(color: Colors.white)
-              : const Text('Create Account'),
+          child:
+              isLoading
+                  ? const CircularProgressIndicator(color: Colors.white)
+                  : const Text('Create Account'),
         ),
       ],
-    );
-  }
-
-  Widget field(
-    TextEditingController controller,
-    String label, {
-    bool obscure = false,
-  }) {
-    return TextField(
-      controller: controller,
-      obscureText: obscure,
-      decoration: InputDecoration(
-        labelText: label,
-        filled: true,
-        fillColor: const Color(0xFF111C2E),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
-      ),
     );
   }
 }
@@ -467,11 +515,13 @@ class _ResetPasswordDialogState extends State<ResetPasswordDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+
     return AlertDialog(
       backgroundColor: const Color(0xFF061226),
       title: const Text('Reset Password'),
       content: SizedBox(
-        width: 420,
+        width: width < 700 ? width * 0.86 : 420,
         child: TextField(
           controller: email,
           decoration: InputDecoration(
@@ -489,9 +539,10 @@ class _ResetPasswordDialogState extends State<ResetPasswordDialog> {
         ),
         ElevatedButton(
           onPressed: isLoading ? null : sendReset,
-          child: isLoading
-              ? const CircularProgressIndicator(color: Colors.white)
-              : const Text('Send Reset Link'),
+          child:
+              isLoading
+                  ? const CircularProgressIndicator(color: Colors.white)
+                  : const Text('Send Reset Link'),
         ),
       ],
     );
