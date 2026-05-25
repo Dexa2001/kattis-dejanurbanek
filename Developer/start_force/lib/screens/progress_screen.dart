@@ -3,7 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-
+import '../widgets/app_page_header.dart';
 import 'test_detail_screen.dart';
 import '../services/pdf_report_service.dart';
 
@@ -252,21 +252,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
   }
 
   Widget pageHeader() {
-    return Row(
-      children: [
-        IconButton(
-          onPressed: () => Navigator.pop(context),
-          icon: const Icon(Icons.arrow_back),
-        ),
-        const SizedBox(width: 8),
-        const Expanded(
-          child: Text(
-            'Progress',
-            style: TextStyle(fontSize: 38, fontWeight: FontWeight.bold),
-          ),
-        ),
-      ],
-    );
+    return const AppPageHeader(title: 'Progress');
   }
 
   Widget filtersBar() {

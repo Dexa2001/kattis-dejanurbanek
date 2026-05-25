@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
+import '../theme/app_colors.dart';
 import 'progress_screen.dart';
 import 'results_screen.dart';
 import 'run_test_screen.dart';
@@ -24,9 +25,13 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
+
     timer = Timer.periodic(const Duration(seconds: 1), (_) {
       if (!mounted) return;
-      setState(() => now = DateTime.now());
+
+      setState(() {
+        now = DateTime.now();
+      });
     });
   }
 
@@ -46,9 +51,14 @@ class _HomeScreenState extends State<HomeScreen> {
 
   String formatClock(DateTime dateTime) {
     int hour = dateTime.hour;
+
     final period = hour >= 12 ? 'PM' : 'AM';
+
     hour = hour % 12;
-    if (hour == 0) hour = 12;
+
+    if (hour == 0) {
+      hour = 12;
+    }
 
     final minute = dateTime.minute.toString().padLeft(2, '0');
     final second = dateTime.second.toString().padLeft(2, '0');
@@ -77,6 +87,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   String coachFirstName() {
     final user = FirebaseAuth.instance.currentUser;
+
     final email = user?.email ?? 'coach';
 
     var firstName = 'Coach';
@@ -102,17 +113,21 @@ class _HomeScreenState extends State<HomeScreen> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          backgroundColor: const Color(0xFF061226),
+          backgroundColor: AppColors.darkNavy,
           title: const Text('Log Out'),
           content: const Text('Are you sure you want to log out?'),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(context, false),
+              onPressed: () {
+                Navigator.pop(context, false);
+              },
               child: const Text('Cancel'),
             ),
             ElevatedButton(
-              onPressed: () => Navigator.pop(context, true),
               style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+              onPressed: () {
+                Navigator.pop(context, true);
+              },
               child: const Text('Log Out'),
             ),
           ],
@@ -137,13 +152,13 @@ class _HomeScreenState extends State<HomeScreen> {
         height: compact ? 48 : 54,
         width: compact ? 48 : 54,
         decoration: BoxDecoration(
-          color: const Color(0xFF111C2E),
+          color: AppColors.card,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.white10),
+          border: Border.all(color: AppColors.border),
         ),
         child: IconButton(
           onPressed: onPressed,
-          icon: Icon(icon, color: Colors.white, size: compact ? 24 : 28),
+          icon: Icon(icon, color: AppColors.white, size: compact ? 24 : 28),
         ),
       ),
     );
@@ -166,7 +181,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   style: TextStyle(
                     fontSize: 36,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                    color: AppColors.white,
                     letterSpacing: 0.5,
                   ),
                 ),
@@ -197,7 +212,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   style: const TextStyle(
                     fontSize: 16,
                     height: 1.45,
-                    color: Colors.white70,
+                    color: AppColors.whiteMuted,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -222,14 +237,14 @@ class _HomeScreenState extends State<HomeScreen> {
                 style: TextStyle(
                   fontSize: 46,
                   fontWeight: FontWeight.bold,
-                  color: Colors.white,
+                  color: AppColors.white,
                   letterSpacing: 1,
                 ),
               ),
               SizedBox(height: 8),
               Text(
                 'Measure. Track. Improve.',
-                style: TextStyle(fontSize: 18, color: Colors.white70),
+                style: TextStyle(fontSize: 18, color: AppColors.whiteMuted),
               ),
             ],
           ),
@@ -242,7 +257,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 Text(
                   'Welcome Coach $firstName',
                   style: const TextStyle(
-                    color: Colors.white70,
+                    color: AppColors.whiteMuted,
                     fontSize: 17,
                     fontWeight: FontWeight.w600,
                   ),
@@ -279,7 +294,7 @@ class _HomeScreenState extends State<HomeScreen> {
           style: const TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
-            color: Colors.white,
+            color: AppColors.white,
           ),
         ),
         const SizedBox(height: 3),
@@ -289,7 +304,7 @@ class _HomeScreenState extends State<HomeScreen> {
           style: const TextStyle(
             fontSize: 12,
             fontStyle: FontStyle.italic,
-            color: Colors.white60,
+            color: AppColors.whiteSoft,
           ),
         ),
       ],
@@ -300,9 +315,9 @@ class _HomeScreenState extends State<HomeScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
       decoration: BoxDecoration(
-        color: const Color(0xFF111C2E),
+        color: AppColors.card,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white10),
+        border: Border.all(color: AppColors.border),
       ),
       child: Column(
         crossAxisAlignment: alignment,
@@ -317,7 +332,7 @@ class _HomeScreenState extends State<HomeScreen> {
             style: const TextStyle(
               fontSize: 14,
               fontStyle: FontStyle.italic,
-              color: Colors.white60,
+              color: AppColors.whiteSoft,
             ),
           ),
         ],
@@ -342,7 +357,7 @@ class _HomeScreenState extends State<HomeScreen> {
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [color, Color.lerp(color, const Color(0xFF061226), 0.18)!],
+            colors: [color, Color.lerp(color, AppColors.darkNavy, 0.18)!],
           ),
           borderRadius: BorderRadius.circular(28),
           boxShadow: [
@@ -366,19 +381,19 @@ class _HomeScreenState extends State<HomeScreen> {
                       height: featured ? 58 : 52,
                       width: featured ? 58 : 52,
                       decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.18),
+                        color: AppColors.white.withValues(alpha: 0.18),
                         borderRadius: BorderRadius.circular(18),
                       ),
                       child: Icon(
                         icon,
                         size: featured ? 34 : 30,
-                        color: Colors.white,
+                        color: AppColors.white,
                       ),
                     ),
                     const Spacer(),
                     const Icon(
                       Icons.chevron_right_rounded,
-                      color: Colors.white,
+                      color: AppColors.white,
                       size: 34,
                     ),
                   ],
@@ -391,7 +406,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   style: TextStyle(
                     fontSize: featured ? 27 : 24,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                    color: AppColors.white,
                   ),
                 ),
                 const SizedBox(height: 7),
@@ -402,7 +417,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   style: const TextStyle(
                     fontSize: 15,
                     height: 1.25,
-                    color: Colors.white70,
+                    color: AppColors.whiteMuted,
                   ),
                 ),
               ],
@@ -419,7 +434,7 @@ class _HomeScreenState extends State<HomeScreen> {
         title: 'Run Force Test',
         subtitle: 'Start force plate testing',
         icon: Icons.play_arrow_rounded,
-        color: const Color(0xFF1976FF),
+        color: AppColors.blue,
         screen: const RunTestScreen(),
         featured: true,
       ),
@@ -427,7 +442,7 @@ class _HomeScreenState extends State<HomeScreen> {
         title: '6×50 Test Set',
         subtitle: 'Group swim prediction test',
         icon: Icons.pool_rounded,
-        color: const Color(0xFF00B8A9),
+        color: AppColors.teal,
         screen: const SixFiftyTestScreen(),
         featured: true,
       ),
@@ -435,28 +450,28 @@ class _HomeScreenState extends State<HomeScreen> {
         title: 'Swimmers',
         subtitle: 'Manage roster and profiles',
         icon: Icons.people_alt_rounded,
-        color: const Color(0xFF00A0C6),
+        color: AppColors.cyan,
         screen: const SwimmersScreen(),
       ),
       dashboardCard(
         title: 'Results',
         subtitle: 'View testing history',
         icon: Icons.bar_chart_rounded,
-        color: const Color(0xFF6C4DFF),
+        color: AppColors.purple,
         screen: const ResultsScreen(),
       ),
       dashboardCard(
         title: 'Progress',
         subtitle: 'Track trends and readiness',
         icon: Icons.show_chart_rounded,
-        color: const Color(0xFFFF8C1A),
+        color: AppColors.orange,
         screen: const ProgressScreen(),
       ),
       dashboardCard(
         title: 'Settings',
         subtitle: 'Sensors, BLE, calibration',
         icon: Icons.tune_rounded,
-        color: const Color(0xFF334155),
+        color: AppColors.slate,
         screen: const SettingsScreen(),
       ),
     ];
@@ -491,9 +506,9 @@ class _HomeScreenState extends State<HomeScreen> {
       width: double.infinity,
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: const Color(0xFF111C2E),
+        color: AppColors.card,
         borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: Colors.white10),
+        border: Border.all(color: AppColors.border),
       ),
       child: const Row(
         children: [
@@ -502,10 +517,10 @@ class _HomeScreenState extends State<HomeScreen> {
           Expanded(
             child: Text(
               'Connected to Firebase',
-              style: TextStyle(color: Colors.white70),
+              style: TextStyle(color: AppColors.whiteMuted),
             ),
           ),
-          Icon(Icons.verified_rounded, color: Colors.white30),
+          Icon(Icons.verified_rounded, color: AppColors.whiteSubtle),
         ],
       ),
     );
@@ -516,19 +531,19 @@ class _HomeScreenState extends State<HomeScreen> {
       width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: const Color(0xFF111C2E),
+        color: AppColors.card,
         borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: Colors.white10),
+        border: Border.all(color: AppColors.border),
       ),
       child: const Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(Icons.lightbulb_outline_rounded, color: Color(0xFFFF8C1A)),
+          Icon(Icons.lightbulb_outline_rounded, color: AppColors.orange),
           SizedBox(width: 12),
           Expanded(
             child: Text(
               'SwimForce+ • v1.2 • Est. 2024',
-              style: TextStyle(color: Colors.white60, height: 1.35),
+              style: TextStyle(color: AppColors.whiteSoft, height: 1.35),
             ),
           ),
         ],
@@ -539,9 +554,11 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
+
     final compact = width < 850;
 
     return Scaffold(
+      backgroundColor: AppColors.navy,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: EdgeInsets.symmetric(

@@ -2,11 +2,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-
+import '../widgets/stat_card.dart';
 import '../services/pdf_report_service.dart';
 import '../services/six_fifty_pdf_service.dart';
 import 'six_fifty_test_detail_screen.dart';
 import 'test_detail_screen.dart';
+import '../theme/app_colors.dart';
 
 class ResultsScreen extends StatefulWidget {
   const ResultsScreen({super.key});
@@ -226,7 +227,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
       context: context,
       builder:
           (_) => AlertDialog(
-            backgroundColor: const Color(0xFF061226),
+            backgroundColor: AppColors.darkNavy,
             title: Text(title),
             content: Text(body),
             actions: [
@@ -282,14 +283,14 @@ class _ResultsScreenState extends State<ResultsScreen> {
             title: 'Force Tests',
             subtitle: 'View force plate testing history',
             icon: Icons.bolt,
-            color: const Color(0xFF1976FF),
+            color: AppColors.blue,
           ),
           typeCard(
             keyValue: 'sixFifty',
             title: '6×50 Tests',
             subtitle: 'View group swim prediction reports',
             icon: Icons.pool_rounded,
-            color: const Color(0xFF00B8A9),
+            color: AppColors.teal,
           ),
         ];
 
@@ -331,10 +332,10 @@ class _ResultsScreenState extends State<ResultsScreen> {
       child: Container(
         padding: const EdgeInsets.all(22),
         decoration: BoxDecoration(
-          color: selected ? color : const Color(0xFF111C2E),
+          color: selected ? color : AppColors.card,
           borderRadius: BorderRadius.circular(24),
           border: Border.all(
-            color: selected ? Colors.white24 : Colors.white10,
+            color: selected ? AppColors.borderStrong : AppColors.border,
             width: selected ? 1.4 : 1,
           ),
           boxShadow:
@@ -364,7 +365,10 @@ class _ResultsScreenState extends State<ResultsScreen> {
                     ),
                   ),
                   const SizedBox(height: 5),
-                  Text(subtitle, style: const TextStyle(color: Colors.white70)),
+                  Text(
+                    subtitle,
+                    style: const TextStyle(color: AppColors.whiteMuted),
+                  ),
                 ],
               ),
             ),
@@ -374,38 +378,6 @@ class _ResultsScreenState extends State<ResultsScreen> {
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget statCard(String title, String value, IconData icon, Color color) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: const Color(0xFF111C2E),
-        borderRadius: BorderRadius.circular(22),
-      ),
-      child: Row(
-        children: [
-          Icon(icon, color: color, size: 34),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title, style: const TextStyle(color: Colors.white70)),
-                const SizedBox(height: 6),
-                Text(
-                  value,
-                  style: const TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -437,29 +409,29 @@ class _ResultsScreenState extends State<ResultsScreen> {
     return LayoutBuilder(
       builder: (context, constraints) {
         final cards = [
-          statCard(
-            'Total Tests',
-            '${tests.length}',
-            Icons.assignment,
-            const Color(0xFF1976FF),
+          StatCard(
+            title: 'Total Tests',
+            value: '${tests.length}',
+            icon: Icons.assignment,
+            color: AppColors.blue,
           ),
-          statCard(
-            'Best Peak',
-            '${bestPeak.toStringAsFixed(1)} kgf',
-            Icons.bolt,
-            Colors.orange,
+          StatCard(
+            title: 'Best Peak',
+            value: '${bestPeak.toStringAsFixed(1)} kgf',
+            icon: Icons.bolt,
+            color: Colors.orange,
           ),
-          statCard(
-            'Best RFD',
-            '${bestRfd.toStringAsFixed(1)} kgf/s',
-            Icons.speed,
-            const Color(0xFF00B8A9),
+          StatCard(
+            title: 'Best RFD',
+            value: '${bestRfd.toStringAsFixed(1)} kgf/s',
+            icon: Icons.speed,
+            color: AppColors.teal,
           ),
-          statCard(
-            'Team Symmetry',
-            '${teamSymmetry.toStringAsFixed(0)} / 100',
-            Icons.balance,
-            const Color(0xFF6C4DFF),
+          StatCard(
+            title: 'Team Symmetry',
+            value: '${teamSymmetry.toStringAsFixed(0)} / 100',
+            icon: Icons.balance,
+            color: AppColors.purple,
           ),
         ];
 
@@ -501,23 +473,23 @@ class _ResultsScreenState extends State<ResultsScreen> {
     return LayoutBuilder(
       builder: (context, constraints) {
         final cards = [
-          statCard(
-            '6×50 Tests',
-            '${tests.length}',
-            Icons.pool_rounded,
-            const Color(0xFF00B8A9),
+          StatCard(
+            title: '6×50 Tests',
+            value: '${tests.length}',
+            icon: Icons.pool_rounded,
+            color: AppColors.teal,
           ),
-          statCard(
-            'Total Swims',
-            '$totalSwims',
-            Icons.groups_rounded,
-            const Color(0xFF1976FF),
+          StatCard(
+            title: 'Total Swims',
+            value: '$totalSwims',
+            icon: Icons.groups_rounded,
+            color: AppColors.blue,
           ),
-          statCard(
-            'Report Type',
-            'Prediction',
-            Icons.summarize_rounded,
-            Colors.orange,
+          StatCard(
+            title: 'Report Type',
+            value: 'Prediction',
+            icon: Icons.summarize_rounded,
+            color: Colors.orange,
           ),
         ];
 
@@ -582,7 +554,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
                 ? 'Search swimmer'
                 : 'Search group, course, or date',
         filled: true,
-        fillColor: const Color(0xFF111C2E),
+        fillColor: AppColors.card,
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(18)),
       ),
     );
@@ -591,11 +563,11 @@ class _ResultsScreenState extends State<ResultsScreen> {
   Widget sortDropdown() {
     return DropdownButtonFormField<String>(
       value: sortMode,
-      dropdownColor: const Color(0xFF111C2E),
+      dropdownColor: AppColors.card,
       decoration: InputDecoration(
         labelText: 'Sort By',
         filled: true,
-        fillColor: const Color(0xFF111C2E),
+        fillColor: AppColors.card,
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(18)),
       ),
       items: const [
@@ -629,7 +601,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
       decoration: BoxDecoration(
-        color: const Color(0xFF111C2E),
+        color: AppColors.card,
         borderRadius: BorderRadius.circular(22),
       ),
       child: ListTile(
@@ -637,7 +609,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
         contentPadding: const EdgeInsets.all(18),
         leading: CircleAvatar(
           radius: 28,
-          backgroundColor: const Color(0xFF1976FF),
+          backgroundColor: AppColors.blue,
           child: Text(
             swimmerName.toString().isEmpty
                 ? '?'
@@ -655,7 +627,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
             '${formatDate(data)}\n'
             'Peak: ${totalPeak.toStringAsFixed(1)} kgf • RFD: ${rfd.toStringAsFixed(1)} kgf/s\n'
             'Front ${frontPeak.toStringAsFixed(1)} / Back ${backPeak.toStringAsFixed(1)} • Balance ${frontBalance.toStringAsFixed(0)} / ${backBalance.toStringAsFixed(0)}',
-            style: const TextStyle(color: Colors.white60),
+            style: const TextStyle(color: AppColors.whiteSoft),
           ),
         ),
         isThreeLine: true,
@@ -685,7 +657,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
         ),
         IconButton(
           tooltip: 'Print PDF',
-          icon: const Icon(Icons.print, color: Colors.white70),
+          icon: const Icon(Icons.print, color: AppColors.whiteMuted),
           onPressed: onPrint,
         ),
         IconButton(
@@ -695,7 +667,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
         ),
         IconButton(
           tooltip: 'View Details',
-          icon: const Icon(Icons.chevron_right, color: Colors.white70),
+          icon: const Icon(Icons.chevron_right, color: AppColors.whiteMuted),
           onPressed: onView,
         ),
       ],
@@ -709,7 +681,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
       decoration: BoxDecoration(
-        color: const Color(0xFF111C2E),
+        color: AppColors.card,
         borderRadius: BorderRadius.circular(22),
       ),
       child: ListTile(
@@ -717,7 +689,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
         contentPadding: const EdgeInsets.all(18),
         leading: const CircleAvatar(
           radius: 28,
-          backgroundColor: Color(0xFF00B8A9),
+          backgroundColor: AppColors.teal,
           child: Icon(Icons.pool_rounded, color: Colors.white),
         ),
         title: Text(
@@ -729,7 +701,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
           child: Text(
             '${data['testDate'] ?? 'Unknown date'}\n'
             '${rows.length} swimmers saved',
-            style: const TextStyle(color: Colors.white60),
+            style: const TextStyle(color: AppColors.whiteSoft),
           ),
         ),
         isThreeLine: true,
@@ -738,12 +710,12 @@ class _ResultsScreenState extends State<ResultsScreen> {
           children: [
             IconButton(
               tooltip: 'View Report',
-              icon: const Icon(Icons.visibility, color: Colors.white70),
+              icon: const Icon(Icons.visibility, color: AppColors.whiteMuted),
               onPressed: () => openSixFiftyDetail(doc.id, data),
             ),
             IconButton(
               tooltip: 'Print PDF',
-              icon: const Icon(Icons.print, color: Colors.white70),
+              icon: const Icon(Icons.print, color: AppColors.whiteMuted),
               onPressed: () => SixFiftyPdfService.printReport(testData: data),
             ),
             IconButton(
@@ -797,7 +769,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
             const SizedBox(height: 24),
             Text(
               '${tests.length} result${tests.length == 1 ? '' : 's'} shown',
-              style: const TextStyle(color: Colors.white60),
+              style: const TextStyle(color: AppColors.whiteSoft),
             ),
             const SizedBox(height: 14),
             ...tests.map(forceResultCard),
@@ -847,7 +819,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
             const SizedBox(height: 24),
             Text(
               '${tests.length} 6×50 report${tests.length == 1 ? '' : 's'} shown',
-              style: const TextStyle(color: Colors.white60),
+              style: const TextStyle(color: AppColors.whiteSoft),
             ),
             const SizedBox(height: 14),
             dateBubbleRow(tests),
@@ -870,12 +842,12 @@ class _ResultsScreenState extends State<ResultsScreen> {
               return Padding(
                 padding: const EdgeInsets.only(right: 10),
                 child: ActionChip(
-                  backgroundColor: const Color(0xFF061226),
-                  side: const BorderSide(color: Colors.white24),
+                  backgroundColor: AppColors.darkNavy,
+                  side: const BorderSide(color: AppColors.borderStrong),
                   avatar: const Icon(
                     Icons.calendar_month,
                     size: 18,
-                    color: Color(0xFF00B8A9),
+                    color: AppColors.teal,
                   ),
                   label: Text(
                     '${data['testDate'] ?? 'Date'} • ${data['groupName'] ?? 'Group'}',
@@ -901,12 +873,12 @@ class _ResultsScreenState extends State<ResultsScreen> {
       width: double.infinity,
       padding: const EdgeInsets.all(30),
       decoration: BoxDecoration(
-        color: const Color(0xFF111C2E),
+        color: AppColors.card,
         borderRadius: BorderRadius.circular(24),
       ),
       child: Column(
         children: [
-          Icon(icon, size: 60, color: Colors.white70),
+          Icon(icon, size: 60, color: AppColors.whiteMuted),
           const SizedBox(height: 18),
           Text(
             title,
@@ -917,7 +889,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
           Text(
             body,
             textAlign: TextAlign.center,
-            style: const TextStyle(color: Colors.white70),
+            style: const TextStyle(color: AppColors.whiteMuted),
           ),
         ],
       ),
