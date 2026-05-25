@@ -527,7 +527,7 @@ class _HomeScreenState extends State<HomeScreen> {
           SizedBox(width: 12),
           Expanded(
             child: Text(
-              'Version 1.2 / Est. 2025',
+              'SwimForce+ • v1.2 • Est. 2024',
               style: TextStyle(color: Colors.white60, height: 1.35),
             ),
           ),

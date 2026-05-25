@@ -47,13 +47,15 @@ class _ResultsScreenState extends State<ResultsScreen> {
   List<QueryDocumentSnapshot> sortedAndFilteredForce(
     List<QueryDocumentSnapshot> docs,
   ) {
-    final filtered = docs.where((doc) {
-      final data = doc.data() as Map<String, dynamic>;
-      final swimmerName = (data['swimmerName'] ?? '').toString().toLowerCase();
+    final filtered =
+        docs.where((doc) {
+          final data = doc.data() as Map<String, dynamic>;
+          final swimmerName =
+              (data['swimmerName'] ?? '').toString().toLowerCase();
 
-      if (searchText.trim().isEmpty) return true;
-      return swimmerName.contains(searchText.toLowerCase());
-    }).toList();
+          if (searchText.trim().isEmpty) return true;
+          return swimmerName.contains(searchText.toLowerCase());
+        }).toList();
 
     filtered.sort((a, b) {
       final aData = a.data() as Map<String, dynamic>;
@@ -90,7 +92,9 @@ class _ResultsScreenState extends State<ResultsScreen> {
     return filtered;
   }
 
-  List<QueryDocumentSnapshot> filteredSixFifty(List<QueryDocumentSnapshot> docs) {
+  List<QueryDocumentSnapshot> filteredSixFifty(
+    List<QueryDocumentSnapshot> docs,
+  ) {
     return docs.where((doc) {
       final data = doc.data() as Map<String, dynamic>;
       final group = (data['groupName'] ?? '').toString().toLowerCase();
@@ -119,7 +123,8 @@ class _ResultsScreenState extends State<ResultsScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => SixFiftyTestDetailScreen(testId: testId, testData: data),
+        builder:
+            (_) => SixFiftyTestDetailScreen(testId: testId, testData: data),
       ),
     );
   }
@@ -166,7 +171,10 @@ class _ResultsScreenState extends State<ResultsScreen> {
     showMessage('Force test deleted.');
   }
 
-  Future<void> deleteSixFiftyTest(String testId, Map<String, dynamic> data) async {
+  Future<void> deleteSixFiftyTest(
+    String testId,
+    Map<String, dynamic> data,
+  ) async {
     if (uid == null) return;
 
     final confirm = await showDeleteDialog(
@@ -216,32 +224,33 @@ class _ResultsScreenState extends State<ResultsScreen> {
   }) async {
     final result = await showDialog<bool>(
       context: context,
-      builder: (_) => AlertDialog(
-        backgroundColor: const Color(0xFF061226),
-        title: Text(title),
-        content: Text(body),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+      builder:
+          (_) => AlertDialog(
+            backgroundColor: const Color(0xFF061226),
+            title: Text(title),
+            content: Text(body),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('Cancel'),
+              ),
+              ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                onPressed: () => Navigator.pop(context, true),
+                icon: const Icon(Icons.delete),
+                label: const Text('Delete'),
+              ),
+            ],
           ),
-          ElevatedButton.icon(
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            onPressed: () => Navigator.pop(context, true),
-            icon: const Icon(Icons.delete),
-            label: const Text('Delete'),
-          ),
-        ],
-      ),
     );
 
     return result == true;
   }
 
   void showMessage(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 
   Widget pageHeader() {
@@ -286,11 +295,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
 
         if (compact) {
           return Column(
-            children: [
-              cards[0],
-              const SizedBox(height: 14),
-              cards[1],
-            ],
+            children: [cards[0], const SizedBox(height: 14), cards[1]],
           );
         }
 
@@ -332,15 +337,16 @@ class _ResultsScreenState extends State<ResultsScreen> {
             color: selected ? Colors.white24 : Colors.white10,
             width: selected ? 1.4 : 1,
           ),
-          boxShadow: selected
-              ? [
-                  BoxShadow(
-                    color: color.withValues(alpha: 0.25),
-                    blurRadius: 24,
-                    offset: const Offset(0, 12),
-                  ),
-                ]
-              : [],
+          boxShadow:
+              selected
+                  ? [
+                    BoxShadow(
+                      color: color.withValues(alpha: 0.25),
+                      blurRadius: 24,
+                      offset: const Offset(0, 12),
+                    ),
+                  ]
+                  : [],
         ),
         child: Row(
           children: [
@@ -358,10 +364,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
                     ),
                   ),
                   const SizedBox(height: 5),
-                  Text(
-                    subtitle,
-                    style: const TextStyle(color: Colors.white70),
-                  ),
+                  Text(subtitle, style: const TextStyle(color: Colors.white70)),
                 ],
               ),
             ),
@@ -462,14 +465,15 @@ class _ResultsScreenState extends State<ResultsScreen> {
 
         if (constraints.maxWidth < 900) {
           return Column(
-            children: cards
-                .map(
-                  (card) => Padding(
-                    padding: const EdgeInsets.only(bottom: 14),
-                    child: card,
-                  ),
-                )
-                .toList(),
+            children:
+                cards
+                    .map(
+                      (card) => Padding(
+                        padding: const EdgeInsets.only(bottom: 14),
+                        child: card,
+                      ),
+                    )
+                    .toList(),
           );
         }
 
@@ -519,14 +523,15 @@ class _ResultsScreenState extends State<ResultsScreen> {
 
         if (constraints.maxWidth < 900) {
           return Column(
-            children: cards
-                .map(
-                  (card) => Padding(
-                    padding: const EdgeInsets.only(bottom: 14),
-                    child: card,
-                  ),
-                )
-                .toList(),
+            children:
+                cards
+                    .map(
+                      (card) => Padding(
+                        padding: const EdgeInsets.only(bottom: 14),
+                        child: card,
+                      ),
+                    )
+                    .toList(),
           );
         }
 
@@ -549,10 +554,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
           return Column(
             children: [
               searchField(),
-              if (includeSort) ...[
-                const SizedBox(height: 12),
-                sortDropdown(),
-              ],
+              if (includeSort) ...[const SizedBox(height: 12), sortDropdown()],
             ],
           );
         }
@@ -575,9 +577,10 @@ class _ResultsScreenState extends State<ResultsScreen> {
       onChanged: (value) => setState(() => searchText = value),
       decoration: InputDecoration(
         prefixIcon: const Icon(Icons.search),
-        labelText: selectedType == 'force'
-            ? 'Search swimmer'
-            : 'Search group, course, or date',
+        labelText:
+            selectedType == 'force'
+                ? 'Search swimmer'
+                : 'Search group, course, or date',
         filled: true,
         fillColor: const Color(0xFF111C2E),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(18)),
@@ -758,12 +761,13 @@ class _ResultsScreenState extends State<ResultsScreen> {
     if (uid == null) return const SizedBox();
 
     return StreamBuilder<QuerySnapshot>(
-      stream: FirebaseFirestore.instance
-          .collection('coaches')
-          .doc(uid)
-          .collection('tests')
-          .orderBy('createdAt', descending: true)
-          .snapshots(),
+      stream:
+          FirebaseFirestore.instance
+              .collection('coaches')
+              .doc(uid)
+              .collection('tests')
+              .orderBy('createdAt', descending: true)
+              .snapshots(),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return errorText('Could not load force results:\n${snapshot.error}');
@@ -807,12 +811,13 @@ class _ResultsScreenState extends State<ResultsScreen> {
     if (uid == null) return const SizedBox();
 
     return StreamBuilder<QuerySnapshot>(
-      stream: FirebaseFirestore.instance
-          .collection('coaches')
-          .doc(uid)
-          .collection('sixFiftyTests')
-          .orderBy('createdAt', descending: true)
-          .snapshots(),
+      stream:
+          FirebaseFirestore.instance
+              .collection('coaches')
+              .doc(uid)
+              .collection('sixFiftyTests')
+              .orderBy('createdAt', descending: true)
+              .snapshots(),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return errorText('Could not load 6×50 results:\n${snapshot.error}');
@@ -858,26 +863,27 @@ class _ResultsScreenState extends State<ResultsScreen> {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: Row(
-        children: tests.map((doc) {
-          final data = doc.data() as Map<String, dynamic>;
+        children:
+            tests.map((doc) {
+              final data = doc.data() as Map<String, dynamic>;
 
-          return Padding(
-            padding: const EdgeInsets.only(right: 10),
-            child: ActionChip(
-              backgroundColor: const Color(0xFF061226),
-              side: const BorderSide(color: Colors.white24),
-              avatar: const Icon(
-                Icons.calendar_month,
-                size: 18,
-                color: Color(0xFF00B8A9),
-              ),
-              label: Text(
-                '${data['testDate'] ?? 'Date'} • ${data['groupName'] ?? 'Group'}',
-              ),
-              onPressed: () => openSixFiftyDetail(doc.id, data),
-            ),
-          );
-        }).toList(),
+              return Padding(
+                padding: const EdgeInsets.only(right: 10),
+                child: ActionChip(
+                  backgroundColor: const Color(0xFF061226),
+                  side: const BorderSide(color: Colors.white24),
+                  avatar: const Icon(
+                    Icons.calendar_month,
+                    size: 18,
+                    color: Color(0xFF00B8A9),
+                  ),
+                  label: Text(
+                    '${data['testDate'] ?? 'Date'} • ${data['groupName'] ?? 'Group'}',
+                  ),
+                  onPressed: () => openSixFiftyDetail(doc.id, data),
+                ),
+              );
+            }).toList(),
       ),
     );
   }

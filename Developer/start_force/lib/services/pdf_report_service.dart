@@ -30,7 +30,8 @@ class PdfReportService {
 
   static String formatDate(dynamic value) {
     try {
-      if (value == null) return DateFormat('MMM d, yyyy h:mm a').format(DateTime.now());
+      if (value == null)
+        return DateFormat('MMM d, yyyy h:mm a').format(DateTime.now());
 
       if (value.toString().contains('Timestamp')) {
         return value.toString();
@@ -85,9 +86,10 @@ class PdfReportService {
 
     final samples = samplesFrom(testData);
 
-    final swimmerName = text(testData['swimmerName']).isNotEmpty
-        ? text(testData['swimmerName'])
-        : '${text(swimmerData?['firstName'])} ${text(swimmerData?['lastName'])}';
+    final swimmerName =
+        text(testData['swimmerName']).isNotEmpty
+            ? text(testData['swimmerName'])
+            : '${text(swimmerData?['firstName'])} ${text(swimmerData?['lastName'])}';
 
     final frontAverage = number(testData['frontAverageKgf']);
     final backAverage = number(testData['backAverageKgf']);
@@ -124,11 +126,23 @@ class PdfReportService {
 
             pw.Row(
               children: [
-                metricCard('Front Peak', '${frontPeak.toStringAsFixed(1)} kgf', 'Avg ${frontAverage.toStringAsFixed(1)}'),
+                metricCard(
+                  'Front Peak',
+                  '${frontPeak.toStringAsFixed(1)} kgf',
+                  'Avg ${frontAverage.toStringAsFixed(1)}',
+                ),
                 pw.SizedBox(width: 8),
-                metricCard('Back Peak', '${backPeak.toStringAsFixed(1)} kgf', 'Avg ${backAverage.toStringAsFixed(1)}'),
+                metricCard(
+                  'Back Peak',
+                  '${backPeak.toStringAsFixed(1)} kgf',
+                  'Avg ${backAverage.toStringAsFixed(1)}',
+                ),
                 pw.SizedBox(width: 8),
-                metricCard('Total Peak', '${totalPeak.toStringAsFixed(1)} kgf', 'Avg ${totalAverage.toStringAsFixed(1)}'),
+                metricCard(
+                  'Total Peak',
+                  '${totalPeak.toStringAsFixed(1)} kgf',
+                  'Avg ${totalAverage.toStringAsFixed(1)}',
+                ),
               ],
             ),
 
@@ -136,11 +150,23 @@ class PdfReportService {
 
             pw.Row(
               children: [
-                metricCard('Balance', '${frontBalance.toStringAsFixed(0)} / ${backBalance.toStringAsFixed(0)}', 'Front / Back'),
+                metricCard(
+                  'Balance',
+                  '${frontBalance.toStringAsFixed(0)} / ${backBalance.toStringAsFixed(0)}',
+                  'Front / Back',
+                ),
                 pw.SizedBox(width: 8),
-                metricCard('RFD', '${rfd.toStringAsFixed(1)} kgf/s', 'Peak total / time'),
+                metricCard(
+                  'RFD',
+                  '${rfd.toStringAsFixed(1)} kgf/s',
+                  'Peak total / time',
+                ),
                 pw.SizedBox(width: 8),
-                metricCard('Duration', '${duration.toStringAsFixed(2)} s', 'Test length'),
+                metricCard(
+                  'Duration',
+                  '${duration.toStringAsFixed(2)} s',
+                  'Test length',
+                ),
               ],
             ),
 
@@ -158,11 +184,23 @@ class PdfReportService {
 
             pw.Row(
               children: [
-                metricCard('Front Avg BW', '${frontBwAvg.toStringAsFixed(0)}%', 'Peak ${frontBwPeak.toStringAsFixed(0)}%'),
+                metricCard(
+                  'Front Avg BW',
+                  '${frontBwAvg.toStringAsFixed(0)}%',
+                  'Peak ${frontBwPeak.toStringAsFixed(0)}%',
+                ),
                 pw.SizedBox(width: 8),
-                metricCard('Back Avg BW', '${backBwAvg.toStringAsFixed(0)}%', 'Peak ${backBwPeak.toStringAsFixed(0)}%'),
+                metricCard(
+                  'Back Avg BW',
+                  '${backBwAvg.toStringAsFixed(0)}%',
+                  'Peak ${backBwPeak.toStringAsFixed(0)}%',
+                ),
                 pw.SizedBox(width: 8),
-                metricCard('Distribution', '${frontBalance.toStringAsFixed(0)} / ${backBalance.toStringAsFixed(0)}', 'Front / Back'),
+                metricCard(
+                  'Distribution',
+                  '${frontBalance.toStringAsFixed(0)} / ${backBalance.toStringAsFixed(0)}',
+                  'Front / Back',
+                ),
               ],
             ),
 
@@ -271,14 +309,20 @@ class PdfReportService {
         child: pw.Column(
           crossAxisAlignment: pw.CrossAxisAlignment.start,
           children: [
-            pw.Text(title, style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey700)),
+            pw.Text(
+              title,
+              style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey700),
+            ),
             pw.SizedBox(height: 5),
             pw.Text(
               value,
               style: pw.TextStyle(fontSize: 15, fontWeight: pw.FontWeight.bold),
             ),
             pw.SizedBox(height: 3),
-            pw.Text(subtitle, style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey600)),
+            pw.Text(
+              subtitle,
+              style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey600),
+            ),
           ],
         ),
       ),
@@ -297,7 +341,10 @@ class PdfReportService {
       child: pw.Column(
         crossAxisAlignment: pw.CrossAxisAlignment.start,
         children: [
-          pw.Text(title, style: pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold)),
+          pw.Text(
+            title,
+            style: pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold),
+          ),
           pw.SizedBox(height: 5),
           pw.Text(body, style: const pw.TextStyle(fontSize: 10)),
         ],
@@ -310,7 +357,8 @@ class PdfReportService {
       return infoBox('Chart unavailable', 'No sample data was recorded.');
     }
 
-    final limited = samples.length > 80 ? samples.sublist(samples.length - 80) : samples;
+    final limited =
+        samples.length > 80 ? samples.sublist(samples.length - 80) : samples;
 
     final maxTotal = limited
         .map((s) => number(s['total']))
@@ -342,23 +390,24 @@ class PdfReportService {
           pw.Expanded(
             child: pw.Row(
               crossAxisAlignment: pw.CrossAxisAlignment.end,
-              children: limited.map((sample) {
-                final total = number(sample['total']);
-                final height = (total / scaleMax) * 120;
+              children:
+                  limited.map((sample) {
+                    final total = number(sample['total']);
+                    final height = (total / scaleMax) * 120;
 
-                return pw.Expanded(
-                  child: pw.Padding(
-                    padding: const pw.EdgeInsets.symmetric(horizontal: 1),
-                    child: pw.Container(
-                      height: height,
-                      decoration: pw.BoxDecoration(
-                        color: PdfColor.fromHex('#FF9800'),
-                        borderRadius: pw.BorderRadius.circular(2),
+                    return pw.Expanded(
+                      child: pw.Padding(
+                        padding: const pw.EdgeInsets.symmetric(horizontal: 1),
+                        child: pw.Container(
+                          height: height,
+                          decoration: pw.BoxDecoration(
+                            color: PdfColor.fromHex('#FF9800'),
+                            borderRadius: pw.BorderRadius.circular(2),
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
-                );
-              }).toList(),
+                    );
+                  }).toList(),
             ),
           ),
           pw.SizedBox(height: 6),
@@ -390,28 +439,56 @@ class PdfReportService {
 
   static pw.Widget metricsTable(Map<String, dynamic> testData) {
     final rows = [
-      ['Front Average', '${number(testData['frontAverageKgf']).toStringAsFixed(2)} kgf'],
-      ['Front Peak', '${number(testData['frontPeakKgf']).toStringAsFixed(2)} kgf'],
-      ['Back Average', '${number(testData['backAverageKgf']).toStringAsFixed(2)} kgf'],
-      ['Back Peak', '${number(testData['backPeakKgf']).toStringAsFixed(2)} kgf'],
-      ['Total Average', '${number(testData['totalAverageKgf']).toStringAsFixed(2)} kgf'],
-      ['Total Peak', '${number(testData['totalPeakKgf']).toStringAsFixed(2)} kgf'],
-      ['Balance Front', '${number(testData['balanceFrontPercent']).toStringAsFixed(1)}%'],
-      ['Balance Back', '${number(testData['balanceBackPercent']).toStringAsFixed(1)}%'],
-      ['RFD', '${number(testData['rfdKgfPerSecond']).toStringAsFixed(2)} kgf/s'],
-      ['Duration', '${number(testData['durationSeconds']).toStringAsFixed(2)} s'],
+      [
+        'Front Average',
+        '${number(testData['frontAverageKgf']).toStringAsFixed(2)} kgf',
+      ],
+      [
+        'Front Peak',
+        '${number(testData['frontPeakKgf']).toStringAsFixed(2)} kgf',
+      ],
+      [
+        'Back Average',
+        '${number(testData['backAverageKgf']).toStringAsFixed(2)} kgf',
+      ],
+      [
+        'Back Peak',
+        '${number(testData['backPeakKgf']).toStringAsFixed(2)} kgf',
+      ],
+      [
+        'Total Average',
+        '${number(testData['totalAverageKgf']).toStringAsFixed(2)} kgf',
+      ],
+      [
+        'Total Peak',
+        '${number(testData['totalPeakKgf']).toStringAsFixed(2)} kgf',
+      ],
+      [
+        'Balance Front',
+        '${number(testData['balanceFrontPercent']).toStringAsFixed(1)}%',
+      ],
+      [
+        'Balance Back',
+        '${number(testData['balanceBackPercent']).toStringAsFixed(1)}%',
+      ],
+      [
+        'RFD',
+        '${number(testData['rfdKgfPerSecond']).toStringAsFixed(2)} kgf/s',
+      ],
+      [
+        'Duration',
+        '${number(testData['durationSeconds']).toStringAsFixed(2)} s',
+      ],
     ];
 
     return pw.Table(
       border: pw.TableBorder.all(color: PdfColor.fromHex('#E3E8F0')),
-      children: rows.map((row) {
-        return pw.TableRow(
-          children: [
-            tableCell(row[0], bold: true),
-            tableCell(row[1]),
-          ],
-        );
-      }).toList(),
+      children:
+          rows.map((row) {
+            return pw.TableRow(
+              children: [tableCell(row[0], bold: true), tableCell(row[1])],
+            );
+          }).toList(),
     );
   }
 

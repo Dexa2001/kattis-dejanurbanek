@@ -5,6 +5,7 @@ import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:intl/intl.dart';
 
 import '../bluetooth/bluetooth_service.dart' as swim_ble;
+
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
 
@@ -14,8 +15,8 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen>
     with SingleTickerProviderStateMixin {
-final swim_ble.BluetoothService bluetoothService =
-    swim_ble.BluetoothService();
+  final swim_ble.BluetoothService bluetoothService =
+      swim_ble.BluetoothService();
   bool bluetoothEnabled = false;
   bool scanning = false;
   bool sensorConnected = false;
@@ -77,7 +78,9 @@ final swim_ble.BluetoothService bluetoothService =
       setState(() => devices = results);
     });
 
-    connectionSubscription = bluetoothService.connectionState.listen((connected) {
+    connectionSubscription = bluetoothService.connectionState.listen((
+      connected,
+    ) {
       if (!mounted) return;
       setState(() {
         sensorConnected = connected;
@@ -189,20 +192,21 @@ final swim_ble.BluetoothService bluetoothService =
     } catch (_) {
       showDialog(
         context: context,
-        builder: (_) => AlertDialog(
-          backgroundColor: const Color(0xFF061226),
-          title: Text(mode),
-          content: Text(
-            '$mode has been queued.\n\n'
-            'No live BLE command was sent because no writable sensor characteristic is connected yet.',
-          ),
-          actions: [
-            ElevatedButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Done'),
+        builder:
+            (_) => AlertDialog(
+              backgroundColor: const Color(0xFF061226),
+              title: Text(mode),
+              content: Text(
+                '$mode has been queued.\n\n'
+                'No live BLE command was sent because no writable sensor characteristic is connected yet.',
+              ),
+              actions: [
+                ElevatedButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Done'),
+                ),
+              ],
             ),
-          ],
-        ),
       );
     }
   }
@@ -241,9 +245,9 @@ final swim_ble.BluetoothService bluetoothService =
 
   void showMessage(String message) {
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 
   Widget sectionTitle(String title) {
@@ -352,9 +356,7 @@ final swim_ble.BluetoothService bluetoothService =
               const SizedBox(width: 14),
               Expanded(
                 child: Text(
-                  bluetoothEnabled
-                      ? 'Bluetooth Enabled'
-                      : 'Bluetooth Disabled',
+                  bluetoothEnabled ? 'Bluetooth Enabled' : 'Bluetooth Disabled',
                   style: const TextStyle(fontSize: 18),
                 ),
               ),
@@ -371,14 +373,16 @@ final swim_ble.BluetoothService bluetoothService =
                   onPressed: scanning ? null : startScan,
                 ),
                 actionButton(
-                  text: sensorConnected && connectedDevice != null
-                      ? 'Disconnect BLE'
-                      : 'Disconnect',
+                  text:
+                      sensorConnected && connectedDevice != null
+                          ? 'Disconnect BLE'
+                          : 'Disconnect',
                   icon: Icons.bluetooth_disabled_rounded,
                   color: Colors.redAccent,
-                  onPressed: sensorConnected && connectedDevice != null
-                      ? disconnectDevice
-                      : null,
+                  onPressed:
+                      sensorConnected && connectedDevice != null
+                          ? disconnectDevice
+                          : null,
                 ),
                 actionButton(
                   text: usbModeEnabled ? 'Disable USB-C Mode' : 'USB-C Mode',
@@ -442,41 +446,42 @@ final swim_ble.BluetoothService bluetoothService =
     }
 
     return Column(
-      children: devices.map((device) {
-        final name = deviceName(device.device);
-        final rssi = device.rssi;
+      children:
+          devices.map((device) {
+            final name = deviceName(device.device);
+            final rssi = device.rssi;
 
-        return Container(
-          margin: const EdgeInsets.only(bottom: 14),
-          decoration: BoxDecoration(
-            color: const Color(0xFF111C2E),
-            borderRadius: BorderRadius.circular(22),
-          ),
-          child: ListTile(
-            contentPadding: const EdgeInsets.all(16),
-            leading: const CircleAvatar(
-              backgroundColor: Color(0xFF1976FF),
-              child: Icon(Icons.memory_rounded),
-            ),
-            title: Text(
-              name,
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
-            subtitle: Text(
-              '${device.device.remoteId.str}\nRSSI: $rssi dBm',
-              style: const TextStyle(color: Colors.white60),
-            ),
-            isThreeLine: true,
-            trailing: ElevatedButton(
-              onPressed: () => connectDevice(device.device),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF00B8A9),
+            return Container(
+              margin: const EdgeInsets.only(bottom: 14),
+              decoration: BoxDecoration(
+                color: const Color(0xFF111C2E),
+                borderRadius: BorderRadius.circular(22),
               ),
-              child: const Text('Connect'),
-            ),
-          ),
-        );
-      }).toList(),
+              child: ListTile(
+                contentPadding: const EdgeInsets.all(16),
+                leading: const CircleAvatar(
+                  backgroundColor: Color(0xFF1976FF),
+                  child: Icon(Icons.memory_rounded),
+                ),
+                title: Text(
+                  name,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+                subtitle: Text(
+                  '${device.device.remoteId.str}\nRSSI: $rssi dBm',
+                  style: const TextStyle(color: Colors.white60),
+                ),
+                isThreeLine: true,
+                trailing: ElevatedButton(
+                  onPressed: () => connectDevice(device.device),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF00B8A9),
+                  ),
+                  child: const Text('Connect'),
+                ),
+              ),
+            );
+          }).toList(),
     );
   }
 

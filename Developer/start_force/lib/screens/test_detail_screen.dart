@@ -174,10 +174,7 @@ class _TestDetailScreenState extends State<TestDetailScreen> {
           maxY: 320,
           minX: 0,
           maxX: maxX <= 0 ? 15 : maxX,
-          gridData: const FlGridData(
-            show: true,
-            drawVerticalLine: true,
-          ),
+          gridData: const FlGridData(show: true, drawVerticalLine: true),
           extraLinesData: ExtraLinesData(
             verticalLines: [
               VerticalLine(
@@ -189,8 +186,12 @@ class _TestDetailScreenState extends State<TestDetailScreen> {
             ],
           ),
           titlesData: FlTitlesData(
-            topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-            rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            topTitles: const AxisTitles(
+              sideTitles: SideTitles(showTitles: false),
+            ),
+            rightTitles: const AxisTitles(
+              sideTitles: SideTitles(showTitles: false),
+            ),
             leftTitles: AxisTitles(
               sideTitles: SideTitles(
                 showTitles: true,
@@ -201,7 +202,10 @@ class _TestDetailScreenState extends State<TestDetailScreen> {
                     padding: const EdgeInsets.only(right: 10),
                     child: Text(
                       value.toInt().toString(),
-                      style: const TextStyle(color: Colors.white70, fontSize: 13),
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 13,
+                      ),
                     ),
                   );
                 },
@@ -217,7 +221,10 @@ class _TestDetailScreenState extends State<TestDetailScreen> {
                     padding: const EdgeInsets.only(top: 8),
                     child: Text(
                       value.toStringAsFixed(0),
-                      style: const TextStyle(color: Colors.white70, fontSize: 12),
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 12,
+                      ),
                     ),
                   );
                 },
@@ -233,8 +240,8 @@ class _TestDetailScreenState extends State<TestDetailScreen> {
               barWidth: 4,
               dotData: FlDotData(
                 show: true,
-                checkToShowDot: (spot, barData) =>
-                    (spot.x - selectedTime).abs() < 0.01,
+                checkToShowDot:
+                    (spot, barData) => (spot.x - selectedTime).abs() < 0.01,
               ),
             ),
             LineChartBarData(
@@ -244,8 +251,8 @@ class _TestDetailScreenState extends State<TestDetailScreen> {
               barWidth: 4,
               dotData: FlDotData(
                 show: true,
-                checkToShowDot: (spot, barData) =>
-                    (spot.x - selectedTime).abs() < 0.01,
+                checkToShowDot:
+                    (spot, barData) => (spot.x - selectedTime).abs() < 0.01,
               ),
             ),
             LineChartBarData(
@@ -255,8 +262,8 @@ class _TestDetailScreenState extends State<TestDetailScreen> {
               barWidth: 4,
               dotData: FlDotData(
                 show: true,
-                checkToShowDot: (spot, barData) =>
-                    (spot.x - selectedTime).abs() < 0.01,
+                checkToShowDot:
+                    (spot, barData) => (spot.x - selectedTime).abs() < 0.01,
               ),
             ),
           ],
@@ -300,7 +307,8 @@ class _TestDetailScreenState extends State<TestDetailScreen> {
         ),
         metricCard(
           title: 'Balance',
-          value: '${frontBalance.toStringAsFixed(0)} / ${backBalance.toStringAsFixed(0)}',
+          value:
+              '${frontBalance.toStringAsFixed(0)} / ${backBalance.toStringAsFixed(0)}',
           color: const Color(0xFF111C2E),
           subtitle: 'Front / Back',
         ),
@@ -371,7 +379,8 @@ class _TestDetailScreenState extends State<TestDetailScreen> {
             ),
             metricCard(
               title: 'Balance',
-              value: '${frontBalance.toStringAsFixed(0)} / ${backBalance.toStringAsFixed(0)}',
+              value:
+                  '${frontBalance.toStringAsFixed(0)} / ${backBalance.toStringAsFixed(0)}',
               color: const Color(0xFF111C2E),
               subtitle: 'Front / Back',
             ),
@@ -393,7 +402,11 @@ class _TestDetailScreenState extends State<TestDetailScreen> {
       ),
       child: Row(
         children: [
-          const Icon(Icons.psychology_alt, color: Colors.orangeAccent, size: 34),
+          const Icon(
+            Icons.psychology_alt,
+            color: Colors.orangeAccent,
+            size: 34,
+          ),
           const SizedBox(width: 14),
           Expanded(
             child: Text(
@@ -430,12 +443,18 @@ class _TestDetailScreenState extends State<TestDetailScreen> {
                       children: [
                         const Text(
                           'Test Details',
-                          style: TextStyle(fontSize: 38, fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                            fontSize: 38,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                         const SizedBox(height: 4),
                         Text(
                           '$swimmerName • ${formatDate()} • ${duration.toStringAsFixed(2)}s',
-                          style: const TextStyle(color: Colors.white70, fontSize: 16),
+                          style: const TextStyle(
+                            color: Colors.white70,
+                            fontSize: 16,
+                          ),
                         ),
                       ],
                     ),
