@@ -190,6 +190,7 @@ class _SettingsScreenState extends State<SettingsScreen>
 
       showMessage('$mode command sent.');
     } catch (_) {
+      if (!mounted) return;
       showDialog(
         context: context,
         builder:

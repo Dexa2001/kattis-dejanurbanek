@@ -493,12 +493,16 @@ class _ResetPasswordDialogState extends State<ResetPasswordDialog> {
         email: email.text.trim(),
       );
 
-      if (mounted) Navigator.pop(context);
+      if (!mounted) return;
+
+      Navigator.pop(context);
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Password reset email sent.')),
       );
     } on FirebaseAuthException catch (e) {
+      if (!mounted) return;
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(e.message ?? 'Could not send reset email.')),
       );

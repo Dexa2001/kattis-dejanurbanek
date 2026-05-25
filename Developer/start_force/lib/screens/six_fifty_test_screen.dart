@@ -971,8 +971,21 @@ class _SixFiftyTestScreenState extends State<SixFiftyTestScreen> {
     final width = MediaQuery.of(context).size.width;
     final compact = width < 1350;
 
-    return WillPopScope(
-      onWillPop: confirmExit,
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) async {
+        if (didPop) return;
+
+        final navigator = Navigator.of(context);
+
+        final shouldExit = await confirmExit();
+
+        if (!mounted) return;
+
+        if (shouldExit) {
+          navigator.pop();
+        }
+      },
       child: Scaffold(
         backgroundColor: const Color(0xFF02112B),
         body: SafeArea(
@@ -1000,8 +1013,14 @@ class _SixFiftyTestScreenState extends State<SixFiftyTestScreen> {
                       children: [
                         IconButton(
                           onPressed: () async {
-                            if (await confirmExit() && mounted) {
-                              Navigator.pop(context);
+                            final navigator = Navigator.of(context);
+
+                            final shouldExit = await confirmExit();
+
+                            if (!mounted) return;
+
+                            if (shouldExit) {
+                              navigator.pop();
                             }
                           },
                           icon: const Icon(Icons.arrow_back),

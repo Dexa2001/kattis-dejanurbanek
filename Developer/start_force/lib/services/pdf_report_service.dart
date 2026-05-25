@@ -30,8 +30,9 @@ class PdfReportService {
 
   static String formatDate(dynamic value) {
     try {
-      if (value == null)
+      if (value == null) {
         return DateFormat('MMM d, yyyy h:mm a').format(DateTime.now());
+      }
 
       if (value.toString().contains('Timestamp')) {
         return value.toString();
@@ -511,9 +512,9 @@ class PdfReportService {
           return pw.TableRow(
             children: [
               tableCell('${number(sample['time']).toStringAsFixed(2)} s'),
-              tableCell('${number(sample['front']).toStringAsFixed(1)}'),
-              tableCell('${number(sample['back']).toStringAsFixed(1)}'),
-              tableCell('${number(sample['total']).toStringAsFixed(1)}'),
+              tableCell(number(sample['front']).toStringAsFixed(1)),
+              tableCell(number(sample['back']).toStringAsFixed(1)),
+              tableCell(number(sample['total']).toStringAsFixed(1)),
             ],
           );
         }),

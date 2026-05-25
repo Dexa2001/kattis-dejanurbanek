@@ -314,7 +314,7 @@ class _TestDetailScreenState extends State<TestDetailScreen> {
         ),
         metricCard(
           title: 'RFD',
-          value: '${rfd.toStringAsFixed(1)}',
+          value: rfd.toStringAsFixed(1),
           color: const Color(0xFF111C2E),
           subtitle: 'kgf/s',
         ),
