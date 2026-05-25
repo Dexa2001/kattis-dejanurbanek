@@ -1,5 +1,5 @@
-name: start_force
-description: "A new Flutter project."
+name: swimforce_plus
+description: "SwimForce+ performance testing app."
 publish_to: 'none'
 
 version: 1.0.0+1
@@ -37,9 +37,11 @@ flutter:
   uses-material-design: true
 
   assets:
+    - assets/images/swimforce_icon.png
     - assets/images/login_bg_mobile_9x16.png
     - assets/images/login_bg_web_16x9.png
     - assets/images/login_bg_tablet_4x3.png
+    
 
 flutter_launcher_icons:
   android: true

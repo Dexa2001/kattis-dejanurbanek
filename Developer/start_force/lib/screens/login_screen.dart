@@ -342,6 +342,10 @@ class _CoachRegisterDialogState extends State<CoachRegisterDialog> {
         'phone': phone.text.trim(),
         'email': email.text.trim(),
         'role': 'coach',
+        'approved': false,
+        'status': 'pending',
+        'approvedAt': null,
+        'approvedBy': null,
         'createdAt': FieldValue.serverTimestamp(),
       });
 

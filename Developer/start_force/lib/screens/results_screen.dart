@@ -1,13 +1,15 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import '../widgets/stat_card.dart';
 import '../services/pdf_report_service.dart';
 import '../services/six_fifty_pdf_service.dart';
 import 'six_fifty_test_detail_screen.dart';
 import 'test_detail_screen.dart';
 import '../theme/app_colors.dart';
+import '../models/force_test_model.dart';
+import '../models/six_fifty_test_model.dart';
+import '../utils/date_formatters.dart';
 
 class ResultsScreen extends StatefulWidget {
   const ResultsScreen({super.key});
@@ -27,22 +29,6 @@ class _ResultsScreenState extends State<ResultsScreen> {
     if (value is int) return value.toDouble();
     if (value is double) return value;
     return double.tryParse(value?.toString() ?? '') ?? 0;
-  }
-
-  String formatDate(Map<String, dynamic> test) {
-    final raw = test['testStartedAt'];
-    final parsed = DateTime.tryParse(raw?.toString() ?? '');
-
-    if (parsed != null) {
-      return DateFormat('MMM d, yyyy • h:mm a').format(parsed);
-    }
-
-    final createdAt = test['createdAt'];
-    if (createdAt is Timestamp) {
-      return DateFormat('MMM d, yyyy • h:mm a').format(createdAt.toDate());
-    }
-
-    return 'Unknown date';
   }
 
   List<QueryDocumentSnapshot> sortedAndFilteredForce(
@@ -466,7 +452,9 @@ class _ResultsScreenState extends State<ResultsScreen> {
 
     for (final doc in tests) {
       final data = doc.data() as Map<String, dynamic>;
-      final rows = data['rows'] as List<dynamic>? ?? [];
+      final test = SixFiftyTestModel.fromMap(doc.id, data);
+
+      final rows = test.rows;
       totalSwims += rows.length;
     }
 
@@ -585,14 +573,15 @@ class _ResultsScreenState extends State<ResultsScreen> {
 
   Widget forceResultCard(QueryDocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
+    final test = ForceTestModel.fromMap(doc.id, data);
 
-    final swimmerName = data['swimmerName'] ?? 'Unknown Swimmer';
-    final totalPeak = number(data['totalPeakKgf']);
-    final frontPeak = number(data['frontPeakKgf']);
-    final backPeak = number(data['backPeakKgf']);
-    final rfd = number(data['rfdKgfPerSecond']);
-    final frontBalance = number(data['balanceFrontPercent']);
-    final backBalance = number(data['balanceBackPercent']);
+    final swimmerName = test.swimmerName;
+    final totalPeak = test.totalPeakKgf;
+    final frontPeak = test.frontPeakKgf;
+    final backPeak = test.backPeakKgf;
+    final rfd = test.rfdKgfPerSecond;
+    final frontBalance = test.balanceFrontPercent;
+    final backBalance = test.balanceBackPercent;
     final balanceDiff = (frontBalance - backBalance).abs();
 
     final balanceColor =
@@ -624,7 +613,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
         subtitle: Padding(
           padding: const EdgeInsets.only(top: 8),
           child: Text(
-            '${formatDate(data)}\n'
+            '${DateFormatters.testDate(data['testStartedAt'] ?? data['createdAt'])}\n'
             'Peak: ${totalPeak.toStringAsFixed(1)} kgf • RFD: ${rfd.toStringAsFixed(1)} kgf/s\n'
             'Front ${frontPeak.toStringAsFixed(1)} / Back ${backPeak.toStringAsFixed(1)} • Balance ${frontBalance.toStringAsFixed(0)} / ${backBalance.toStringAsFixed(0)}',
             style: const TextStyle(color: AppColors.whiteSoft),
@@ -676,7 +665,9 @@ class _ResultsScreenState extends State<ResultsScreen> {
 
   Widget sixFiftyCard(QueryDocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
-    final rows = data['rows'] as List<dynamic>? ?? [];
+    final test = SixFiftyTestModel.fromMap(doc.id, data);
+
+    final rows = test.rows;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
@@ -693,13 +684,13 @@ class _ResultsScreenState extends State<ResultsScreen> {
           child: Icon(Icons.pool_rounded, color: Colors.white),
         ),
         title: Text(
-          '${data['groupName'] ?? 'Group'} • ${data['course'] ?? ''}',
+          '${test.groupName} • ${test.course}',
           style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
         ),
         subtitle: Padding(
           padding: const EdgeInsets.only(top: 8),
           child: Text(
-            '${data['testDate'] ?? 'Unknown date'}\n'
+            '${test.testDate}'
             '${rows.length} swimmers saved',
             style: const TextStyle(color: AppColors.whiteSoft),
           ),
